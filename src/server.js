@@ -1,6 +1,14 @@
-const app = require('./app');
-const PORT = 8080;
+const app = require("./app");
+const connectDB = require("./config/db");
+const { PORT } = require("./config/env.config");
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+
+const startServer = async () => {
+  await connectDB();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor escuchando en el puerto ${PORT}`);
+  });
+};
+
+startServer();

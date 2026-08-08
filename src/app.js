@@ -11,6 +11,9 @@ app.get('/', (req, res) => {
   res.json({ message: '¡Servidor funcionando correctamente!' });
 });
 
+const mocksRouter = require('./routes/mocks.router.js');
+app.use('/api/mocks', mocksRouter);
+
 // Manejador de rutas no encontradas (404)
 app.use((req, res) => {
   res.status(404).json({ error: '404 Not Found' });
