@@ -1,8 +1,10 @@
-# ShipNow - Mocking y carga de datos de prueba
+# ShipNow - Mocking y manejo profesional de errores
 
 API desarrollada con Node.js, Express y MongoDB para la generación de datos simulados y su posterior carga en la base de datos.
 
 El proyecto implementa una arquitectura por capas y permite generar usuarios, órdenes, repartidores y entregas respetando los modelos y constantes definidos en la aplicación.
+
+Además, cuenta con una capa centralizada de manejo de errores mediante errores personalizados, un diccionario de errores y un middleware global para devolver respuestas HTTP consistentes.
 
 ## Tecnologías
 
