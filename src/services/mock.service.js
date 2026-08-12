@@ -11,20 +11,52 @@
   const deliveryPersonRepository = require("../repositories/deliveryPerson.repository.js");
   const deliveryRepository = require("../repositories/delivery.repository.js");
 
-  const generateUsers = (qty) => { return generateMockUsers(qty); };
+  const AppError = require("../utils/errors/appError.js");
+
+const validateQuantity = (qty) => {
+    if (!Number.isInteger(qty) || qty <= 0) {
+        throw new AppError("INVALID_MOCK_QUANTITY");
+    }
+};
+
+const validateUserIds = (userIds) => {
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+        throw new AppError("MOCK_GENERATION_ERROR");
+    }
+};
+
+const validateOrders = (orders) => {
+    if (!Array.isArray(orders) || orders.length === 0) {
+        throw new AppError("MOCK_GENERATION_ERROR");
+    }
+};
+
+const validateDeliveryPersons = (deliveryPersons) => {
+    if (!Array.isArray(deliveryPersons) || deliveryPersons.length === 0) {
+        throw new AppError("MOCK_GENERATION_ERROR");
+    }
+};
+
+  const generateUsers = (qty) => {
+    validateQuantity(qty);
+    return generateMockUsers(qty); };
 
 
   const generateOrders = (userIds) => {
+    validateUserIds(userIds);
     return generateMockOrders(userIds);
   };
 
 
   const generateDeliveryPersons = (userIds) => {
+    validateDeliveryPersons(userIds);
     return generateMockDeliveryPersons(userIds);
   };
 
 
   const generateDeliveries = (orders, deliveryPersons) => {
+    validateOrders(orders);
+    validateDeliveryPersons(deliveryPersons);
     return generateMockDeliveries(
       orders,
       deliveryPersons
@@ -32,6 +64,9 @@
   };
 
   const generateSeedData = async (qty = 10) => {
+
+  try{
+
   // 1. Usuarios
   const users = generateUsers(qty);
   const savedUsers = await userRepository.insertMany(users);
@@ -62,8 +97,15 @@
     deliveryPersons: savedDeliveryPersons.length,
     deliveries: savedDeliveries.length
   };
-};
+} catch (error) {
 
+        if (error instanceof AppError) {
+            throw error;
+        }
+
+        throw new AppError("MOCK_DATABASE_ERROR");
+    }
+};
 
   module.exports = {
     generateUsers,

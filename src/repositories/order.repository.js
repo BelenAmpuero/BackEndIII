@@ -10,6 +10,10 @@ class OrderRepository {
         return await Order.find();
     }
 
+    async getById(id) {
+        return await Order.findById(id);
+    }
+
 }
 
 module.exports = new OrderRepository();

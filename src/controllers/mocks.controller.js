@@ -1,30 +1,35 @@
 const {
     generateUsers,
     generateOrders,
-    generateDeliveryPersons,
-    generateDeliveries,
     generateSeedData
 } = require("../services/mock.service.js");
-const User = require("../models/user.model.js");
-const Order = require("../models/order.models.js");
-const DeliveryPerson = require("../models/deliveryPerson.model.js");
-const Delivery = require("../models/delivery.model.js");
 
-const getMockingUsers = (req, res) => {
+const getMockingUsers = (req, res, next) => {
 
-    const qty = Number(req.query.qty) || 1;
+    try {
 
-    const users = generateUsers(qty);
+        const qty = req.query.qty === undefined
+            ? 1
+            : Number(req.query.qty);
 
-    res.json({
-        status: "success",
-        payload: users
-    });
+        const users = generateUsers(qty);
+
+        res.json({
+            status: "success",
+            payload: users
+        });
+
+    } catch (error) {
+        next(error);
+    }
 };
 
-    const getMockingOrders = (req, res) => {
+    const getMockingOrders = (req, res, next ) => {
 
-    const qty = Number(req.query.qty) || 5;
+        try {
+    const qty = req.query.qty === undefined
+    ? 5
+    : Number (req.query.qty);
 
     const users = generateUsers(qty);
 
@@ -36,21 +41,18 @@ const getMockingUsers = (req, res) => {
         status: "success",
         payload: orders
     });
+} catch (error) {
+next(error);
+}
 };
 
-const generateData = async (req, res) => {
+const generateData = async (req, res, next) => {
 
     try {
 
-        const qty = Number(req.query.qty);
-
-if (!Number.isInteger(qty) || qty <= 0) {
-  return res.status(400).json({
-    status: "error",
-    message: "El parámetro qty debe ser un número entero mayor que 0."
-  });
-}
-
+        const qty = req.query.qty === undefined
+        ? 10
+        : Number (req.query.qty);
 
         const result = await generateSeedData(qty);
 
@@ -62,10 +64,7 @@ if (!Number.isInteger(qty) || qty <= 0) {
 
     } catch (error) {
 
-        res.status(500).json({
-            status: "error",
-            message: error.message
-        });
+        next (error);
 
     }
 

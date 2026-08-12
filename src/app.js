@@ -2,6 +2,8 @@ const express = require('express');
 
 const app = express();
 
+const errorHandler = require("./middlewares/errorHandler");
+
 // Middlewares globales básicos
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -14,9 +16,5 @@ app.get('/', (req, res) => {
 const mocksRouter = require('./routes/mocks.router.js');
 app.use('/api/mocks', mocksRouter);
 
-// Manejador de rutas no encontradas (404)
-app.use((req, res) => {
-  res.status(404).json({ error: '404 Not Found' });
-});
-
+app.use(errorHandler);
 module.exports = app;
