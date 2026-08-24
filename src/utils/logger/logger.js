@@ -7,12 +7,6 @@ const envConfig = require("../../config/env.config.js");
 
 console.log("ENV CONFIG:", envConfig);
 
-
-// const {
-//     isProd,
-//     logLevel
-// } = require("../../config/env.config.js");
-
 const {
     isProd,
     logLevel
@@ -90,10 +84,6 @@ const consoleFormat = isProd
         })
     );
 
-    console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("LOG_LEVEL:", process.env.LOG_LEVEL);
-console.log("isProd:", isProd);
-console.log("logLevel:", logLevel);
 
 // Crear logger
 const logger = winston.createLogger({
