@@ -13,10 +13,6 @@ requiredEnv.forEach((envVar) => {
   }
 });
 
-console.log("ENV CONFIG CARGADO");
-console.log("isProd dentro de env.config:", isProd);
-console.log("logLevel dentro de env.config:", logLevel);
-
 module.exports = {
   PORT: process.env.PORT,
   MONGODB_URI: process.env.MONGODB_URI,
