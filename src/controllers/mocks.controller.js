@@ -3,7 +3,7 @@ const {
     generateOrders,
     generateSeedData
 } = require("../services/mock.service.js");
-
+const logger = require("../utils/logger/logger");
 const getMockingUsers = (req, res, next) => {
 
     try {
@@ -11,6 +11,8 @@ const getMockingUsers = (req, res, next) => {
         const qty = req.query.qty === undefined
             ? 1
             : Number(req.query.qty);
+
+        logger.info(`Generando ${qty} usuarios mock`);
 
         const users = generateUsers(qty);
 
@@ -30,6 +32,8 @@ const getMockingUsers = (req, res, next) => {
     const qty = req.query.qty === undefined
     ? 5
     : Number (req.query.qty);
+
+    logger.info(`Generando ${qty} pedidos mock`);
 
     const users = generateUsers(qty);
 
@@ -54,7 +58,11 @@ const generateData = async (req, res, next) => {
         ? 10
         : Number (req.query.qty);
 
+        logger.info(`Generando datos de prueba. Cantidad: ${qty}`);
+
         const result = await generateSeedData(qty);
+
+        logger.info("Datos de prueba generados correctamente");
 
         res.status(201).json({
             status: "success",

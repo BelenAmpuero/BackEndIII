@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const logger = require("../utils/logger/logger");
 
 const connectDB = async () => {
   try {
@@ -6,9 +7,11 @@ const connectDB = async () => {
       dbName: "Shipnow",
     });
 
-    console.log("✅ MongoDB conectado");
+    logger.info("✅ MongoDB conectado");
   } catch (error) {
-    console.error("❌ Error de conexión:", error);
+    logger.fatal(`❌ Error de conexión: ${error.message}`,{
+      stack: error.stack
+    });
     process.exit(1);
   }
 };
