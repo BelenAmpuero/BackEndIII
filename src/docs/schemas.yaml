@@ -1,0 +1,397 @@
+components:
+  schemas:
+
+    # =========================
+    # USER
+    # =========================
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del usuario
+          example: "64f1a2b3c4d5e6f789012345"
+
+        name:
+          type: string
+          description: Nombre completo del usuario
+          example: "Juan Pérez"
+
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+          example: "juan.perez@example.com"
+
+        password:
+          type: string
+          description: Contraseña almacenada de forma hasheada
+          example: "$2b$10$examplehashedpassword"
+
+        role:
+          type: string
+          enum:
+            - admin
+            - user
+            - delivery
+          description: Rol asignado al usuario
+          example: user
+
+        phone:
+          type: string
+          description: Número telefónico del usuario
+          example: "+54 351 5551234"
+
+        address:
+          type: string
+          description: Dirección del usuario
+          example: "Av. Colón 1234"
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del usuario
+          example: "2026-08-25T18:30:00.000Z"
+
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+          example: "2026-08-25T18:30:00.000Z"
+
+
+    # =========================
+    # ORDER ITEM
+    # =========================
+
+    OrderItem:
+      type: object
+      properties:
+        product:
+          type: string
+          description: Nombre del producto
+          example: "Wireless Mouse"
+
+        quantity:
+          type: integer
+          minimum: 1
+          description: Cantidad de unidades del producto
+          example: 2
+
+        price:
+          type: number
+          format: float
+          minimum: 0
+          description: Precio unitario del producto
+          example: 4500
+
+
+    # =========================
+    # ORDER
+    # =========================
+
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del pedido
+          example: "64f1a2b3c4d5e6f789012346"
+
+        user:
+          type: string
+          description: Identificador del usuario asociado al pedido
+          example: "64f1a2b3c4d5e6f789012345"
+
+        items:
+          type: array
+          minItems: 1
+          description: Productos incluidos en el pedido
+          items:
+            $ref: "#/components/schemas/OrderItem"
+
+        total:
+          type: number
+          format: float
+          minimum: 0
+          description: Total calculado del pedido
+          example: 12500
+
+        deliveryAddress:
+          type: string
+          description: Dirección donde debe entregarse el pedido
+          example: "Av. Colón 1234"
+
+        status:
+          type: string
+          enum:
+            - pending
+            - accepted
+            - preparing
+            - on_the_way
+            - delivered
+            - cancelled
+          description: Estado actual del pedido
+          example: pending
+
+        priority:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+          description: Prioridad del pedido
+          example: medium
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del pedido
+          example: "2026-08-25T18:30:00.000Z"
+
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+          example: "2026-08-25T18:30:00.000Z"
+
+
+    # =========================
+    # DELIVERY PERSON
+    # =========================
+
+    DeliveryPerson:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del repartidor
+          example: "64f1a2b3c4d5e6f789012347"
+
+        user:
+          type: string
+          description: Identificador del usuario asociado al repartidor
+          example: "64f1a2b3c4d5e6f789012345"
+
+        vehicle:
+          type: object
+          description: Información del vehículo del repartidor
+          properties:
+            kind:
+              type: string
+              enum:
+                - moto
+                - bicycle
+                - car
+              description: Tipo de vehículo
+              example: moto
+
+            plate:
+              type: string
+              description: Patente o matrícula del vehículo
+              example: "ABC123"
+
+        isAvailable:
+          type: boolean
+          description: Indica si el repartidor está disponible
+          example: true
+
+        currentLocation:
+          type: object
+          description: Ubicación actual del repartidor
+          properties:
+            lat:
+              type: number
+              format: float
+              description: Latitud
+              example: -31.4167
+
+            lng:
+              type: number
+              format: float
+              description: Longitud
+              example: -64.1833
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del repartidor
+          example: "2026-08-25T18:30:00.000Z"
+
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+          example: "2026-08-25T18:30:00.000Z"
+
+
+    # =========================
+    # DELIVERY
+    # =========================
+
+    Delivery:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único de la entrega
+          example: "64f1a2b3c4d5e6f789012348"
+
+        order:
+          type: string
+          description: Identificador del pedido asociado
+          example: "64f1a2b3c4d5e6f789012346"
+
+        deliveryPerson:
+          type: string
+          description: Identificador del repartidor asignado
+          example: "64f1a2b3c4d5e6f789012347"
+
+        status:
+          type: string
+          enum:
+            - assigned
+            - picked_up
+            - completed
+            - failed
+          description: Estado actual de la entrega
+          example: assigned
+
+        assignedAt:
+          type: string
+          format: date-time
+          description: Fecha en la que se asignó la entrega
+          example: "2026-08-25T18:30:00.000Z"
+
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Fecha en la que se completó la entrega
+          example: "2026-08-25T19:15:00.000Z"
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del registro
+          example: "2026-08-25T18:30:00.000Z"
+
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+          example: "2026-08-25T19:15:00.000Z"
+
+
+    # =========================
+    # ERROR RESPONSE
+    # =========================
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Indica que la operación terminó con error
+          example: error
+
+        code:
+          type: string
+          description: Código identificador del error
+          example: INVALID_MOCK_QUANTITY
+
+        message:
+          type: string
+          description: Descripción del error
+          example: "La cantidad de mocks solicitada no es válida"
+
+
+    # =========================
+    # SUCCESS RESPONSE
+    # =========================
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Indica que la operación fue exitosa
+          example: success
+
+        message:
+          type: string
+          description: Mensaje descriptivo de la operación
+          example: "Operación realizada correctamente"
+
+
+    # =========================
+    # USER MOCK RESPONSE
+    # =========================
+
+    UserMockResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+
+        payload:
+          type: array
+          description: Lista de usuarios generados
+          items:
+            $ref: "#/components/schemas/User"
+
+
+    # =========================
+    # ORDER MOCK RESPONSE
+    # =========================
+
+    OrderMockResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+
+        payload:
+          type: array
+          description: Lista de pedidos generados
+          items:
+            $ref: "#/components/schemas/Order"
+
+
+    # =========================
+    # MOCK GENERATION RESPONSE
+    # =========================
+
+    MockGenerationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+
+        message:
+          type: string
+          example: "Datos de prueba generados correctamente"
+
+        inserted:
+          type: object
+          description: Cantidad de registros insertados por entidad
+          properties:
+            users:
+              type: integer
+              example: 10
+
+            orders:
+              type: integer
+              example: 10
+
+            deliveryPersons:
+              type: integer
+              example: 10
+
+            deliveries:
+              type: integer
+              example: 10

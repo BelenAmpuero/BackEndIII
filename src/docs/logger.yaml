@@ -1,0 +1,150 @@
+paths:
+
+  # ==========================================
+  # LOGGER DEBUG
+  # ==========================================
+
+  /api/loggerTest/debug:
+    get:
+      summary: Probar nivel DEBUG del logger
+      description: Genera un mensaje de prueba con nivel DEBUG para validar el funcionamiento del sistema de logging.
+      tags:
+        - Logger
+
+      responses:
+
+        "200":
+          description: Log DEBUG generado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+              example:
+                status: success
+                message: "Log DEBUG generado correctamente"
+
+
+  # ==========================================
+  # LOGGER HTTP
+  # ==========================================
+
+  /api/loggerTest/http:
+    get:
+      summary: Probar nivel HTTP del logger
+      description: Genera un mensaje de prueba con nivel HTTP para validar el funcionamiento del sistema de logging.
+      tags:
+        - Logger
+
+      responses:
+
+        "200":
+          description: Log HTTP generado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+              example:
+                status: success
+                message: "Log HTTP generado correctamente"
+
+
+  # ==========================================
+  # LOGGER INFO
+  # ==========================================
+
+  /api/loggerTest/info:
+    get:
+      summary: Probar nivel INFO del logger
+      description: Genera un mensaje de prueba con nivel INFO para validar el funcionamiento del sistema de logging.
+      tags:
+        - Logger
+
+      responses:
+
+        "200":
+          description: Log INFO generado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+              example:
+                status: success
+                message: "Log INFO generado correctamente"
+
+
+  # ==========================================
+  # LOGGER WARNING
+  # ==========================================
+
+  /api/loggerTest/warn:
+    get:
+      summary: Probar nivel WARNING del logger
+      description: Genera un mensaje de prueba con nivel WARNING para validar el funcionamiento del sistema de logging.
+      tags:
+        - Logger
+
+      responses:
+
+        "200":
+          description: Log WARNING generado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+              example:
+                status: success
+                message: "Log WARNING generado correctamente"
+
+
+  # ==========================================
+  # LOGGER ERROR
+  # ==========================================
+
+  /api/loggerTest/error:
+    get:
+      summary: Probar nivel ERROR del logger
+      description: Genera un mensaje de prueba con nivel ERROR para validar el funcionamiento del sistema de logging.
+      tags:
+        - Logger
+
+      responses:
+
+        "200":
+          description: Log ERROR generado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+              example:
+                status: success
+                message: "Log ERROR generado correctamente"
+
+
+  # ==========================================
+  # LOGGER FATAL
+  # ==========================================
+
+  /api/loggerTest/fatal:
+    get:
+      summary: Probar nivel FATAL del logger
+      description: Genera un mensaje de prueba con nivel FATAL para validar el funcionamiento del sistema de logging.
+      tags:
+        - Logger
+
+      responses:
+
+        "200":
+          description: Log FATAL generado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+              example:
+                status: success
+                message: "Log FATAL generado correctamente"
