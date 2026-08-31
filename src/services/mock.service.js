@@ -6,12 +6,15 @@
 
   const { generateMockDeliveries } = require("../mocks/delivery.mock.js");
 
+  const logger = require ("../utils/logger/logger.js");
+
   const userRepository = require("../repositories/users.repository.js");
   const orderRepository = require("../repositories/order.repository.js");
   const deliveryPersonRepository = require("../repositories/deliveryPerson.repository.js");
   const deliveryRepository = require("../repositories/delivery.repository.js");
 
   const AppError = require("../utils/errors/appError.js");
+
 
 const validateQuantity = (qty) => {
     if (!Number.isInteger(qty) || qty <= 0) {
@@ -36,6 +39,7 @@ const validateDeliveryPersons = (deliveryPersons) => {
         throw new AppError("MOCK_GENERATION_ERROR");
     }
 };
+
 
   const generateUsers = (qty) => {
     validateQuantity(qty);
@@ -65,6 +69,8 @@ const validateDeliveryPersons = (deliveryPersons) => {
 
   const generateSeedData = async (qty = 10) => {
 
+  logger.info(`Inicio de la generación de datos: ${qty}`);
+
   try{
 
   // 1. Usuarios
@@ -73,14 +79,21 @@ const validateDeliveryPersons = (deliveryPersons) => {
 
   const userIds = savedUsers.map(user => user._id);
 
+  logger.info(`Usiaros guardados: ${savedUsers.length}`);
+
   // 2. Pedidos
   const orders = generateOrders(userIds);
   const savedOrders = await orderRepository.insertMany(orders);
+
+  logger.info(`Pedidos guardados: ${savedOrders.length}`);
 
   // 3. Repartidores
   const deliveryPersons = generateDeliveryPersons(userIds);
   const savedDeliveryPersons =
     await deliveryPersonRepository.insertMany(deliveryPersons);
+
+  logger.info(`Repartidores guardados: ${savedDeliveryPersons.length}`);
+
 
   // 4. Entregas
   const deliveries = generateDeliveries(
@@ -91,6 +104,12 @@ const validateDeliveryPersons = (deliveryPersons) => {
   const savedDeliveries =
     await deliveryRepository.insertMany(deliveries);
 
+    logger.info(`Entregas guardadas: ${savedDeliveries.length}`);
+
+    logger.info(
+  `Mock data generada exitosamente. Users: ${savedUsers.length}, Orders: ${savedOrders.length}, Delivery persons: ${savedDeliveryPersons.length}, Deliveries: ${savedDeliveries.length}`
+);
+
   return {
     users: savedUsers.length,
     orders: savedOrders.length,
@@ -99,12 +118,18 @@ const validateDeliveryPersons = (deliveryPersons) => {
   };
 } catch (error) {
 
+  logger.error("Error generating mock data", {
+    message: error.message,
+    stack: error.stack
+});
+
         if (error instanceof AppError) {
             throw error;
         }
 
         throw new AppError("MOCK_DATABASE_ERROR");
     }
+
 };
 
   module.exports = {

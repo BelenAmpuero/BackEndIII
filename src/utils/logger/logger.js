@@ -5,8 +5,6 @@ const { join } = require("node:path");
 
 const envConfig = require("../../config/env.config.js");
 
-console.log("ENV CONFIG:", envConfig);
-
 const {
     isProd,
     logLevel

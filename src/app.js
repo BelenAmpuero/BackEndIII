@@ -2,6 +2,10 @@ const express = require('express');
 
 const app = express();
 
+const usersRouter = require ("./routes/user.router.js")
+const ordersRouter = require("./routes/order.router.js");
+const deliveryPersonRouter = require("./routes/deliveryPerson.router.js");
+const deliveryRouter = require("./routes/delivery.router.js");
 const errorHandler = require("./middlewares/errorHandler");
 const loggerTestRouter = require("../src/routes/loggerTest.router.js");
 const requestLogger = require("./middlewares/requestLogger.js")
@@ -32,16 +36,38 @@ app.use(
   })
 );
 
-// Ruta de prueba
+// RUTA PRINCIPAL
+
 app.get('/', (req, res) => {
   res.json({ message: '¡Servidor funcionando correctamente!' });
 });
 
+
+// USERS
+
+app.use("/api/users", usersRouter);
+
+// ORDER
+
+app.use("/api/orders", ordersRouter);
+
+// DELIVERY
+
+app.use("/api/deliveryPersons", deliveryPersonRouter);
+
+app.use("/api/deliveries", deliveryRouter);
+
+// Ruta de prueba LOGGER
+
 app.use("/api/loggerTest", loggerTestRouter);
 
+// MOCKS
 
 const mocksRouter = require('./routes/mocks.router.js');
+
 app.use('/api/mocks', mocksRouter);
+
+// ERR HANDLER
 
 app.use(errorHandler);
 module.exports = app;

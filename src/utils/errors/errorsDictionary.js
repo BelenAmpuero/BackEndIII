@@ -68,6 +68,11 @@ const ERROR_CODES = {
     message: "Entrega no encontrada"
   },
 
+  INVALID_DELIVERY_DATA: {
+    status: 400,
+    message: "Los datos de la entrega no son válidos"
+},
+
   DELIVERY_ALREADY_COMPLETED: {
     status: 409,
     message: "La entrega ya fue completada"

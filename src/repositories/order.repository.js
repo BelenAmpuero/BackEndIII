@@ -14,6 +14,21 @@ class OrderRepository {
         return await Order.findById(id);
     }
 
+    async create(orderData) {
+        return await Order.create(orderData);
+    }
+
+    async update(id, orderData) {
+        return await Order.findByIdAndUpdate(
+            id,
+            orderData,
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+    }
+
 }
 
 module.exports = new OrderRepository();

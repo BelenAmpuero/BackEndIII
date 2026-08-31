@@ -16,6 +16,8 @@ const getMockingUsers = (req, res, next) => {
 
         const users = generateUsers(qty);
 
+        logger.info(`Usuarios mock generados correctamente: ${users.length}`);
+
         res.json({
             status: "success",
             payload: users

@@ -14,7 +14,7 @@ const errorHandler = (err, req, res, next) => {
         if (err.status >= 500) {
             logger.error(`Error del servidor: ${err.message}`, logData);
         } else {
-            logger.warn(`Error de aplicación: ${err.message}`, logData);
+            logger.warning(`Error de aplicación: ${err.message}`, logData);
         }
         
         return res.status(err.status).json({
@@ -30,10 +30,10 @@ const errorHandler = (err, req, res, next) => {
         stack: err.stack
     });
 
-    return res.status(500).json({
-        status: "error",
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Error interno del servidor"
+    logger.fatal(`Error interno del servidor: ${err.message}`, {
+        method: req.method,
+        path: req.originalUrl,
+        stack: err.stack
     });
 };
 
