@@ -2,35 +2,35 @@
 
 API desarrollada con Node.js, Express y MongoDB para la generación de datos simulados y su posterior carga en la base de datos.
 
-El proyecto implementa una arquitectura por capas y permite generar usuarios, órdenes, repartidores y entregas respetando los modelos y constantes definidos en la aplicación.
+El proyecto implementa una arquitectura por capas y permite gestionar usuarios, órdenes, repartidores y entregas, respetando los modelos y constantes definidos en la aplicación.
 
 Además, cuenta con:
 
-- Una capa centralizada de manejo de errores mediante errores personalizados.
-- Un diccionario de códigos de error.
-- Un middleware global para devolver respuestas HTTP consistentes.
-- Un sistema de logging centralizado utilizando Winston.
-- Persistencia de logs en archivos.
-- Rotación de archivos de logs.
-- Diferentes niveles de logging según la importancia del evento y el entorno de ejecución.
-- Endpoints de prueba para verificar el funcionamiento de los diferentes niveles de logging.
-- Documentación interactiva de la API mediante Swagger UI y OpenAPI 3.0.
+* Una capa centralizada de manejo de errores mediante errores personalizados.
+* Un diccionario de códigos de error.
+* Un middleware global para devolver respuestas HTTP consistentes.
+* Un sistema de logging centralizado utilizando Winston.
+* Persistencia de logs en archivos.
+* Rotación de archivos de logs.
+* Diferentes niveles de logging según la importancia del evento y el entorno de ejecución.
+* Endpoints de prueba para verificar el funcionamiento de los diferentes niveles de logging.
+* Documentación interactiva de la API mediante Swagger UI y OpenAPI 3.0.
 
 ---
 
 # Tecnologías
 
-- Node.js
-- Express
-- MongoDB
-- Mongoose
-- Faker
-- bcrypt
-- dotenv
-- Winston
-- winston-daily-rotate-file
-- swagger-jsdoc
-- swagger-ui-express
+* Node.js
+* Express
+* MongoDB
+* Mongoose
+* Faker
+* bcrypt
+* dotenv
+* Winston
+* winston-daily-rotate-file
+* swagger-jsdoc
+* swagger-ui-express
 
 ---
 
@@ -62,20 +62,17 @@ Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
 PORT=8080
-
 MONGODB_URI=tu_url_de_mongodb
-
 NODE_ENV=development
-
 LOG_LEVEL=debug
 ```
 
 ## Variables utilizadas
 
-- `PORT`: puerto en el que se ejecuta el servidor.
-- `MONGODB_URI`: cadena de conexión a MongoDB.
-- `NODE_ENV`: define el entorno de ejecución (`development` o `production`).
-- `LOG_LEVEL`: define el nivel mínimo de logging.
+* `PORT`: puerto en el que se ejecuta el servidor.
+* `MONGODB_URI`: cadena de conexión a MongoDB.
+* `NODE_ENV`: define el entorno de ejecución (`development` o `production`).
+* `LOG_LEVEL`: define el nivel mínimo de logging.
 
 > El archivo `.env` contiene información sensible y no debe subirse al repositorio.
 
@@ -119,8 +116,12 @@ http://localhost:8080/api/docs-json
 
 Actualmente la documentación incluye los siguientes módulos:
 
-- **Mocks**
-- **Logger**
+* **Mocks**
+* **Logger**
+* **Users**
+* **Orders**
+* **Delivery Persons**
+* **Deliveries**
 
 Los schemas reutilizables se encuentran separados de la documentación de los endpoints.
 
@@ -128,129 +129,193 @@ La estructura de documentación es:
 
 ```text
 src/
+├── config/
+│   └── docs/
+│       └── swagger.config.js
+│
 └── docs/
-    ├── swagger.config.js
     ├── schemas.yaml
     ├── mocks.yaml
+    ├── users.yaml
+    ├── orders.yaml
+    ├── deliveryPersons.yaml
+    ├── deliveries.yaml
     └── logger.yaml
 ```
 
-Los schemas incluyen las entidades utilizadas por el sistema de generación de datos:
+Los schemas incluyen las entidades utilizadas por la aplicación:
 
-- User
-- Order
-- OrderItem
-- DeliveryPerson
-- Delivery
-- ErrorResponse
-- SuccessResponse
-- respuestas relacionadas con Mocking
-
-> Los modelos `User`, `Order`, `DeliveryPerson` y `Delivery` forman parte de los datos generados por el módulo de Mocking. No existen actualmente routers CRUD independientes para estas entidades, por lo que no se documentan endpoints que no formen parte de la API real.
+* User
+* Order
+* OrderItem
+* DeliveryPerson
+* Delivery
+* ErrorResponse
+* SuccessResponse
+* Respuestas relacionadas con Mocking
 
 ---
 
-# Endpoints de Mocking
+# Endpoints de Users
 
-El módulo de Mocking permite generar datos ficticios utilizando Faker y, en determinados casos, almacenarlos en MongoDB.
+El módulo de Users permite gestionar los usuarios registrados en la aplicación.
 
-## Generar usuarios
+Los usuarios cuentan con información personal y un rol que determina su tipo dentro del sistema.
+
+Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Users**.
+
+Entre las operaciones disponibles se encuentran:
 
 ```http
-GET /api/mocks/mockingusers?qty=5
+GET /api/users
+GET /api/users/:id
+POST /api/users
 ```
 
-Genera usuarios simulados sin almacenarlos en MongoDB.
+Los endpoints realizan las validaciones correspondientes y utilizan el sistema centralizado de manejo de errores.
 
-El parámetro `qty` permite indicar la cantidad de usuarios a generar.
+---
+
+# Endpoints de Orders
+
+El módulo de Orders permite gestionar pedidos asociados a usuarios existentes.
+
+Cada pedido contiene:
+
+* Usuario asociado.
+* Items.
+* Cantidad.
+* Precio.
+* Total.
+* Dirección de entrega.
+* Estado.
+* Prioridad.
+
+Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Orders**.
+
+## Obtener todos los pedidos
+
+```http
+GET /api/orders
+```
+
+Obtiene la lista de pedidos registrados en MongoDB.
+
+## Obtener un pedido por ID
+
+```http
+GET /api/orders/:id
+```
+
+Obtiene un pedido específico utilizando su identificador único.
+
+El endpoint valida que el ID tenga un formato válido y devuelve un error si el pedido no existe.
+
+## Crear un pedido
+
+```http
+POST /api/orders
+```
+
+Crea un nuevo pedido asociado a un usuario existente.
+
+El servidor valida:
+
+* Que el usuario exista.
+* Que el ID del usuario sea válido.
+* Que exista al menos un item.
+* Que la cantidad de cada item sea un número entero mayor o igual a 1.
+* Que el precio sea un número mayor o igual a 0.
+* Que el estado sea válido.
+* Que la prioridad sea válida.
+
+El total se calcula automáticamente a partir de la cantidad y el precio de cada producto.
 
 Ejemplo:
 
-```http
-GET /api/mocks/mockingusers?qty=5
-```
-
-Respuesta:
-
 ```json
 {
-  "status": "success",
-  "payload": [
+  "user": "64f1a2b3c4d5e6f789012345",
+  "items": [
     {
-      "_id": "ObjectId",
-      "name": "Nombre generado",
-      "email": "usuario@example.com",
-      "password": "hash",
-      "role": "user",
-      "phone": "123456789",
-      "address": "Dirección generada"
+      "product": "Hamburguesa clásica",
+      "quantity": 2,
+      "price": 4500
+    },
+    {
+      "product": "Papas fritas",
+      "quantity": 1,
+      "price": 2000
     }
-  ]
+  ],
+  "deliveryAddress": "Av. Colón 1234, Córdoba",
+  "status": "pending",
+  "priority": "low"
 }
 ```
 
----
+El total se calcula automáticamente:
 
-## Generar órdenes
-
-```http
-GET /api/mocks/mockingorders?qty=5
+```text
+2 × 4500 + 1 × 2000 = 11000
 ```
 
-Genera órdenes simuladas asociadas a usuarios ficticios.
-
-Cada orden contiene:
-
-- Usuario asociado.
-- Items.
-- Cantidad.
-- Precio.
-- Total.
-- Dirección de entrega.
-- Estado.
-- Prioridad.
-
-Ejemplo:
+## Actualizar el estado de un pedido
 
 ```http
-GET /api/mocks/mockingorders?qty=5
+PATCH /api/orders/:id/status
 ```
 
----
+Permite actualizar el estado de un pedido existente.
 
-## Generar y guardar datos
-
-```http
-POST /api/mocks/generatedata?qty=10
-```
-
-Genera y almacena en MongoDB datos de prueba relacionados entre sí.
-
-El proceso genera:
-
-- Usuarios.
-- Órdenes.
-- Repartidores.
-- Entregas.
-
-Las relaciones entre las entidades se generan automáticamente durante el proceso.
-
-Ejemplo de respuesta:
+Body:
 
 ```json
 {
-  "status": "success",
-  "message": "Datos de prueba generados correctamente",
-  "inserted": {
-    "users": 10,
-    "orders": 10,
-    "deliveryPersons": 10,
-    "deliveries": 10
-  }
+  "status": "accepted"
 }
 ```
 
-El parámetro `qty` permite definir la cantidad de datos base que se generan.
+Los estados disponibles son:
+
+```text
+pending
+accepted
+preparing
+on_the_way
+delivered
+cancelled
+```
+
+Un pedido que ya se encuentra en estado `cancelled` no puede volver a modificarse.
+
+---
+
+# Endpoints de Delivery Persons
+
+El módulo de Delivery Persons permite gestionar los repartidores utilizados por el sistema.
+
+Los repartidores se encuentran asociados a usuarios y cuentan con información sobre el vehículo utilizado.
+
+Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Delivery Persons**.
+
+Las operaciones y validaciones correspondientes pueden consultarse directamente desde Swagger UI.
+
+---
+
+# Endpoints de Deliveries
+
+El módulo de Deliveries permite gestionar las entregas asociadas a pedidos y repartidores.
+
+Las entregas relacionan:
+
+* Un pedido.
+* Un repartidor.
+* Un estado de entrega.
+
+Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Deliveries**.
+
+Las operaciones y estados disponibles pueden consultarse y probarse directamente desde Swagger UI.
 
 ---
 
@@ -258,9 +323,9 @@ El parámetro `qty` permite definir la cantidad de datos base que se generan.
 
 El proyecto cuenta con un sistema centralizado de manejo de errores que utiliza:
 
-- `AppError`.
-- Un diccionario de códigos de error.
-- Un middleware global `errorHandler`.
+* `AppError`.
+* Un diccionario de códigos de error.
+* Un middleware global `errorHandler`.
 
 Los errores controlados son procesados por el middleware y devueltos al cliente utilizando una estructura JSON consistente.
 
@@ -278,9 +343,9 @@ Una respuesta de error tiene el siguiente formato:
 
 Los campos representan:
 
-- `status`: indica que la operación terminó con un error.
-- `code`: identifica el tipo de error definido en el diccionario de errores.
-- `message`: describe el motivo del error.
+* `status`: indica que la operación terminó con un error.
+* `code`: identifica el tipo de error definido en el diccionario de errores.
+* `message`: describe el motivo del error.
 
 Los errores controlados utilizan el código HTTP correspondiente definido en el diccionario de errores.
 
@@ -308,37 +373,37 @@ El proyecto contempla diferentes códigos de error relacionados con las entidade
 
 ## Users
 
-- `USER_NOT_FOUND` - 404
-- `USER_ALREADY_EXISTS` - 409
-- `INVALID_USER_DATA` - 400
+* `USER_NOT_FOUND` - 404
+* `USER_ALREADY_EXISTS` - 409
+* `INVALID_USER_DATA` - 400
 
 ## Orders
 
-- `ORDER_NOT_FOUND` - 404
-- `INVALID_ORDER_DATA` - 400
-- `INVALID_ORDER_STATUS` - 400
-- `ORDER_ALREADY_CANCELLED` - 409
-- `ORDER_CANNOT_BE_CANCELLED` - 400
+* `ORDER_NOT_FOUND` - 404
+* `INVALID_ORDER_DATA` - 400
+* `INVALID_ORDER_STATUS` - 400
+* `ORDER_ALREADY_CANCELLED` - 409
+* `ORDER_CANNOT_BE_CANCELLED` - 400
 
 ## Delivery Person
 
-- `DELIVERY_PERSON_NOT_FOUND` - 404
-- `DELIVERY_PERSON_NOT_AVAILABLE` - 409
-- `DELIVERY_PERSON_ALREADY_ASSIGNED` - 409
-- `INVALID_DELIVERY_PERSON` - 400
+* `DELIVERY_PERSON_NOT_FOUND` - 404
+* `DELIVERY_PERSON_NOT_AVAILABLE` - 409
+* `DELIVERY_PERSON_ALREADY_ASSIGNED` - 409
+* `INVALID_DELIVERY_PERSON` - 400
 
 ## Delivery
 
-- `DELIVERY_NOT_FOUND` - 404
-- `DELIVERY_ALREADY_COMPLETED` - 409
-- `INVALID_DELIVERY_STATUS` - 400
-- `DELIVERY_ASSIGNMENT_FAILED` - 400
+* `DELIVERY_NOT_FOUND` - 404
+* `DELIVERY_ALREADY_COMPLETED` - 409
+* `INVALID_DELIVERY_STATUS` - 400
+* `DELIVERY_ASSIGNMENT_FAILED` - 400
 
 ## Mocks
 
-- `INVALID_MOCK_QUANTITY` - 400
-- `MOCK_GENERATION_ERROR` - 500
-- `MOCK_DATABASE_ERROR` - 500
+* `INVALID_MOCK_QUANTITY` - 400
+* `MOCK_GENERATION_ERROR` - 500
+* `MOCK_DATABASE_ERROR` - 500
 
 ---
 
@@ -374,6 +439,98 @@ con código HTTP:
 
 ---
 
+# Endpoints de Mocking
+
+El módulo de Mocking permite generar datos ficticios utilizando Faker y, en determinados casos, almacenarlos en MongoDB.
+
+## Generar usuarios
+
+```http
+GET /api/mocks/mockingusers?qty=5
+```
+
+Genera usuarios simulados sin almacenarlos en MongoDB.
+
+El parámetro `qty` permite indicar la cantidad de usuarios a generar.
+
+Ejemplo de respuesta:
+
+```json
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "ObjectId",
+      "name": "Nombre generado",
+      "email": "usuario@example.com",
+      "password": "hash",
+      "role": "user",
+      "phone": "123456789",
+      "address": "Dirección generada"
+    }
+  ]
+}
+```
+
+---
+
+## Generar órdenes
+
+```http
+GET /api/mocks/mockingorders?qty=5
+```
+
+Genera órdenes simuladas asociadas a usuarios ficticios.
+
+Cada orden contiene:
+
+* Usuario asociado.
+* Items.
+* Cantidad.
+* Precio.
+* Total.
+* Dirección de entrega.
+* Estado.
+* Prioridad.
+
+---
+
+## Generar y guardar datos
+
+```http
+POST /api/mocks/generatedata?qty=10
+```
+
+Genera y almacena en MongoDB datos de prueba relacionados entre sí.
+
+El proceso genera:
+
+* Usuarios.
+* Órdenes.
+* Repartidores.
+* Entregas.
+
+Las relaciones entre las entidades se generan automáticamente durante el proceso.
+
+Ejemplo de respuesta:
+
+```json
+{
+  "status": "success",
+  "message": "Datos de prueba generados correctamente",
+  "inserted": {
+    "users": 10,
+    "orders": 10,
+    "deliveryPersons": 10,
+    "deliveries": 10
+  }
+}
+```
+
+El parámetro `qty` permite definir la cantidad de datos base que se generan.
+
+---
+
 # Logging
 
 El proyecto utiliza **Winston** como sistema centralizado de logging.
@@ -384,14 +541,14 @@ El logger permite registrar diferentes tipos de eventos según su importancia y 
 
 ShipNow utiliza los siguientes niveles personalizados:
 
-| Nivel | Descripción |
-|---|---|
-| `fatal` | Fallas críticas que pueden impedir el funcionamiento de la aplicación. |
-| `error` | Errores inesperados o fallas importantes durante una operación. |
+| Nivel     | Descripción                                                                         |
+| --------- | ----------------------------------------------------------------------------------- |
+| `fatal`   | Fallas críticas que pueden impedir el funcionamiento de la aplicación.              |
+| `error`   | Errores inesperados o fallas importantes durante una operación.                     |
 | `warning` | Situaciones anómalas o advertencias que no necesariamente interrumpen la operación. |
-| `info` | Información general sobre el funcionamiento de la aplicación. |
-| `http` | Información relacionada con solicitudes HTTP. |
-| `debug` | Información detallada útil durante el desarrollo y debugging. |
+| `info`    | Información general sobre el funcionamiento de la aplicación.                       |
+| `http`    | Información relacionada con solicitudes HTTP.                                       |
+| `debug`   | Información detallada útil durante el desarrollo y debugging.                       |
 
 Los niveles se encuentran ordenados por prioridad:
 
@@ -660,9 +817,9 @@ Por este motivo, pueden responder `200 OK` después de generar correctamente el 
 En desarrollo, los registros pueden visualizarse en consola con timestamp, nivel y mensaje:
 
 ```text
-2026-08-24 19:00:13 [info] ✅ MongoDB conectado
+2026-08-24 19:00:13 [info] MongoDB conectado
 
-2026-08-24 19:00:13 [info] 🚀 Servidor escuchando en el puerto 8080
+2026-08-24 19:00:13 [info] Servidor escuchando en el puerto 8080
 
 2026-08-24 19:05:21 [debug] Mensaje de prueba - DEBUG
 
@@ -689,6 +846,9 @@ El proyecto utiliza una arquitectura por capas:
 src/
 
 ├── config/
+│   └── docs/
+│       └── swagger.config.js
+│
 ├── controllers/
 ├── docs/
 ├── middlewares/
@@ -699,6 +859,7 @@ src/
 ├── services/
 ├── utils/
 │   └── logger/
+│
 ├── app.js
 └── server.js
 ```
@@ -707,16 +868,27 @@ src/
 
 Contiene la configuración de la aplicación y las variables de entorno.
 
+También contiene la configuración de Swagger/OpenAPI:
+
+```text
+config/
+└── docs/
+    └── swagger.config.js
+```
+
 ## Docs
 
-Contiene la configuración y documentación OpenAPI/Swagger:
+Contiene los schemas y la documentación OpenAPI de los endpoints:
 
 ```text
 docs/
 
-├── swagger.config.js
 ├── schemas.yaml
 ├── mocks.yaml
+├── users.yaml
+├── orders.yaml
+├── deliveryPersons.yaml
+├── deliveries.yaml
 └── logger.yaml
 ```
 
@@ -758,11 +930,11 @@ Contiene utilidades generales del proyecto, incluyendo la configuración central
 
 El sistema permite generar:
 
-- Usuarios con roles válidos.
-- Órdenes asociadas a usuarios.
-- Órdenes con estados y prioridades válidos.
-- Repartidores asociados a usuarios.
-- Entregas asociadas a órdenes y repartidores.
+* Usuarios con roles válidos.
+* Órdenes asociadas a usuarios.
+* Órdenes con estados y prioridades válidos.
+* Repartidores asociados a usuarios.
+* Entregas asociadas a órdenes y repartidores.
 
 Los datos generados respetan los modelos y las constantes definidas en el proyecto.
 
@@ -805,7 +977,26 @@ http://localhost:8080/api/docs
 
 Desde Swagger UI se pueden ejecutar los endpoints disponibles utilizando el botón **Try it out**.
 
-Se recomienda probar:
+Se recomienda probar los siguientes endpoints:
+
+## Users
+
+```text
+GET /api/users
+GET /api/users/:id
+POST /api/users
+```
+
+## Orders
+
+```text
+GET /api/orders
+GET /api/orders/:id
+POST /api/orders
+PATCH /api/orders/:id/status
+```
+
+## Mocking
 
 ```text
 GET /api/mocks/mockingusers?qty=5
@@ -813,7 +1004,7 @@ GET /api/mocks/mockingorders?qty=5
 POST /api/mocks/generatedata?qty=5
 ```
 
-y los endpoints de prueba del logger:
+## Logger
 
 ```text
 GET /api/loggerTest/debug
@@ -828,10 +1019,15 @@ También se pueden comprobar los errores de validación utilizando cantidades in
 
 ```text
 GET /api/mocks/mockingusers?qty=0
+
 GET /api/mocks/mockingusers?qty=-5
+
 GET /api/mocks/mockingorders?qty=abc
+
 POST /api/mocks/generatedata?qty=hola
 ```
+
+Los endpoints de **Delivery Persons** y **Deliveries** también pueden probarse directamente desde sus respectivas secciones en Swagger UI.
 
 ---
 
@@ -841,7 +1037,9 @@ Los siguientes archivos y carpetas no deben subirse al repositorio:
 
 ```gitignore
 node_modules/
+
 .env
+
 logs/
 ```
 
