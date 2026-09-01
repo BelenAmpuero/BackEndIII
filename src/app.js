@@ -9,6 +9,7 @@ const deliveryRouter = require("./routes/delivery.router.js");
 const errorHandler = require("./middlewares/errorHandler");
 const loggerTestRouter = require("../src/routes/loggerTest.router.js");
 const requestLogger = require("./middlewares/requestLogger.js")
+const AppError = require("./utils/errors/appError");
 
 const swaggerUi = require ("swagger-ui-express");
 const { swaggerSpecs } = require ("./docs/swagger.config.js");
@@ -66,6 +67,10 @@ app.use("/api/loggerTest", loggerTestRouter);
 const mocksRouter = require('./routes/mocks.router.js');
 
 app.use('/api/mocks', mocksRouter);
+
+app.use((req, res, next) => {
+  next(new AppError("ROUTE_NOT_FOUND"));
+});
 
 // ERR HANDLER
 

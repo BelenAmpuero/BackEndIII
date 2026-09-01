@@ -3,9 +3,7 @@ const logger = require("../utils/logger/logger");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: "Shipnow",
-    });
+    await mongoose.connect(process.env.MONGODB_URI);
 
     logger.info("✅ MongoDB conectado");
   } catch (error) {

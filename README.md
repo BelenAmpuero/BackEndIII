@@ -31,6 +31,9 @@ Además, cuenta con:
 * winston-daily-rotate-file
 * swagger-jsdoc
 * swagger-ui-express
+* mocka
+* chai
+* supertest
 
 ---
 
@@ -67,16 +70,26 @@ NODE_ENV=development
 LOG_LEVEL=debug
 ```
 
+Para el entorno de testing, crear un archivo .env.test en la raíz:
+
+PORT=8080
+MONGODB_URI_TEST=mongodb://localhost:27017/shipnow-test
+NODE_ENV=test
+LOG_LEVEL=error
+
 ## Variables utilizadas
 
 * `PORT`: puerto en el que se ejecuta el servidor.
-* `MONGODB_URI`: cadena de conexión a MongoDB.
-* `NODE_ENV`: define el entorno de ejecución (`development` o `production`).
+* `MONGODB_URI`: cadena de conexión a MongoDB para desarrollo y testing respectivamente.
+* `NODE_ENV`: define el entorno de ejecución (`development` `production` o `test`).
 * `LOG_LEVEL`: define el nivel mínimo de logging.
 
-> El archivo `.env` contiene información sensible y no debe subirse al repositorio.
+
+
+> Los archivos `.env`y `.env.test`  contiene información sensible y no debe subirse al repositorio.
 
 ---
+
 
 # Ejecución
 
@@ -1030,6 +1043,46 @@ POST /api/mocks/generatedata?qty=hola
 Los endpoints de **Delivery Persons** y **Deliveries** también pueden probarse directamente desde sus respectivas secciones en Swagger UI.
 
 ---
+# Testing
+
+El proyecto cuenta con una suite de tests funcionales automatizados que validan los endpoints principales de ShipNow, cubriendo casos exitosos y errores esperados.
+
+Herramientas utilizadas:
+
+* Mocha: Framework de pruebas para organizar y ejecutar los tests.
+
+* Chai: Librería de aserciones para validar el estado HTTP, la estructura del body y sus propiedades.
+
+* Supertest: Permite realizar peticiones HTTP sobre la app Express de forma aislada sin abrir puertos manualmente.
+
+# Entorno de testing
+
+El entorno está completamente separado del de desarrollo mediante:
+
+Un archivo de configuración dedicado (.env.test).
+
+Una base de datos independiente (shipnow-test) para garantizar datos controlados, repetibles y descartables mediante una estrategia de limpieza automática antes y después de las pruebas.
+
+# Cómo ejecutar los tests
+
+Para correr la suite de pruebas automatizadas, ejecutar:
+
+npm test
+
+# Módulos cubiertos
+
+* Users: Listado de usuarios, obtención por ID y validación de casos de error.
+
+* Orders: Creación con datos válidos, listado, obtención por ID, actualización de estados y validación de errores (datos incompletos, recursos inexistentes, estados inválidos).
+
+* Mocks: Generación de usuarios y órdenes simuladas, y persistencia de datos de prueba en la base de datos de test (/api/mocks).
+
+* Logger: Verificación de los endpoints de prueba de logging (/api/loggerTest).
+
+* Swagger: Comprobación de la accesibilidad de la ruta de documentación interactiva (/api/docs).
+
+
+---
 
 # Git e información sensible
 
@@ -1041,8 +1094,11 @@ node_modules/
 .env
 
 logs/
+
+.env.test
+
 ```
 
-El archivo `.env` contiene las variables de entorno y credenciales necesarias para la aplicación.
+Los archivos `.env` y `.env.test` contienen las variables de entorno y credenciales necesarias para la aplicación.
 
 La carpeta `logs/` contiene archivos generados automáticamente por Winston y no forma parte del código fuente del proyecto.

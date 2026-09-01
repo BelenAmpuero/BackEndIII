@@ -16,6 +16,7 @@ paths:
           description: Error interno del servidor
 
 
+
   /api/orders/{id}:
 
     get:

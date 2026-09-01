@@ -40,6 +40,11 @@ const ERROR_CODES = {
     status: 400,
     message: "El pedido no puede cancelarse en su estado actual"
   },
+  
+ROUTE_NOT_FOUND: {
+  status: 404,
+  message: "Ruta no encontrada"
+},
 
   // Delivery person
   DELIVERY_PERSON_NOT_FOUND: {

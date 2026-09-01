@@ -1,22 +1,29 @@
-require("dotenv").config();
+const dotenv = require("dotenv");
+const path = require("path");
 
-const isProd = process.env.NODE_ENV === "production";
+const NODE_ENV = process.env.NODE_ENV || "development";
+
+if (NODE_ENV === "test") {
+  dotenv.config({
+    path: path.resolve(process.cwd(), ".env.test")
+  });
+} else {
+  dotenv.config();
+}
+
+const isProd = NODE_ENV === "production";
+const isTest = NODE_ENV === "test";
+const isDev = NODE_ENV === "development";
 
 const logLevel =
   process.env.LOG_LEVEL || (isProd ? "info" : "debug");
 
-const requiredEnv = ["PORT", "MONGODB_URI"];
-
-requiredEnv.forEach((envVar) => {
-  if (!process.env[envVar]) {
-    throw new Error(`Falta la variable de entorno: ${envVar}`);
-  }
-});
-
 module.exports = {
-  PORT: process.env.PORT,
+  PORT: process.env.PORT || 3000,
   MONGODB_URI: process.env.MONGODB_URI,
-  NODE_ENV: process.env.NODE_ENV || "development",
+  NODE_ENV,
   isProd,
+  isTest,
+  isDev,
   logLevel
 };
