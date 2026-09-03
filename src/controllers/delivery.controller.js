@@ -18,25 +18,58 @@ const {
 
 
 // ==========================================
-// GET ALL DELIVERIES
+// GET ALL DELIVERIES (Con paginación y filtros)
 // ==========================================
 
 const getDeliveries = async (req, res, next) => {
-
     try {
+        const { page, limit, status, deliveryPerson, order } = req.query;
 
-        const deliveries =
-            await deliveryRepository.getAll();
+        const filter = {};
+
+        if (status) {
+            if (!Object.values(DELIVERY_STATUS).includes(status)) {
+                throw new AppError("INVALID_DELIVERY_STATUS");
+            }
+            filter.status = status;
+        }
+
+        if (deliveryPerson) {
+            if (!mongoose.Types.ObjectId.isValid(deliveryPerson)) {
+                throw new AppError("DELIVERY_PERSON_NOT_FOUND");
+            }
+            filter.deliveryPerson = deliveryPerson;
+        }
+
+        if (order) {
+            if (!mongoose.Types.ObjectId.isValid(order)) {
+                throw new AppError("INVALID_DELIVERY_DATA");
+            }
+            filter.order = order;
+        }
+
+        const options = {
+            page: page ? parseInt(page, 10) : 1,
+            limit: limit ? parseInt(limit, 10) : 10
+        };
+
+        const result = await deliveryRepository.getAll(filter, options);
 
         res.json({
             status: "success",
-            payload: deliveries
+            payload: result.docs,
+            pagination: {
+                totalDocs: result.totalDocs,
+                limit: result.limit,
+                page: result.page,
+                totalPages: result.totalPages,
+                hasNextPage: result.hasNextPage,
+                hasPrevPage: result.hasPrevPage
+            }
         });
 
     } catch (error) {
-
         next(error);
-
     }
 };
 

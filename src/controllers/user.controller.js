@@ -6,20 +6,48 @@ const AppError = require("../utils/errors/appError");
 const logger = require("../utils/logger/logger");
 
 const getUsers = async (req, res, next) => {
-
     try {
+        const { page, limit, role, search } = req.query;
 
-        const users = await userRepository.getAll();
+        // 1. Construir el objeto de filtros dinámico
+        const filter = {};
+
+        if (role) {
+            filter.role = role; // Ejemplo: ?role=admin
+        }
+
+        if (search) {
+            // Búsqueda insensible a mayúsculas/minúsculas en el nombre o email
+            filter.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        // 2. Definir opciones de paginación
+        const options = {
+            page: page ? parseInt(page, 10) : 1,
+            limit: limit ? parseInt(limit, 10) : 10
+        };
+
+        // 3. Llamar al repositorio
+        const result = await userRepository.getAll(filter, options);
 
         res.json({
             status: "success",
-            payload: users
+            payload: result.docs,
+            pagination: {
+                totalDocs: result.totalDocs,
+                limit: result.limit,
+                page: result.page,
+                totalPages: result.totalPages,
+                hasNextPage: result.hasNextPage,
+                hasPrevPage: result.hasPrevPage
+            }
         });
 
     } catch (error) {
-
         next(error);
-
     }
 };
 

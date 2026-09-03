@@ -21,12 +21,115 @@ const getDeliveryPersons = async (req, res, next) => {
 
     try {
 
-        const deliveryPersons =
-            await deliveryPersonRepository.getAll();
+        
+        console.log("QUERY RECIBIDA:", req.query);
+
+        // ==========================================
+        // PAGINATION
+        // ==========================================
+
+        const page = Math.max(
+            parseInt(req.query.page) || 1,
+            1
+        );
+
+        const limit = Math.min(
+            Math.max(
+                parseInt(req.query.limit) || 10,
+                1
+            ),
+            100
+        );
+
+
+        // ==========================================
+        // FILTERS
+        // ==========================================
+
+        const filters = {};
+
+        // Filter by availability
+        if (req.query.isAvailable !== undefined) {
+
+            if (
+                req.query.isAvailable !== "true" &&
+                req.query.isAvailable !== "false"
+            ) {
+                throw new AppError("INVALID_DELIVERY_PERSON");
+            }
+
+            filters.isAvailable =
+                req.query.isAvailable === "true";
+        }
+
+
+        // Filter by vehicle type
+        if (req.query.vehicle) {
+
+            const validVehicles = [
+                "moto",
+                "bicycle",
+                "car"
+            ];
+
+            if (!validVehicles.includes(req.query.vehicle)) {
+                throw new AppError("INVALID_DELIVERY_PERSON");
+            }
+
+            filters["vehicle.kind"] =
+                req.query.vehicle;
+        }
+
+
+        // ==========================================
+        // SORTING
+        // ==========================================
+
+        const allowedSortFields = [
+            "createdAt",
+            "updatedAt",
+            "isAvailable"
+        ];
+
+        const sortBy =
+            req.query.sortBy || "createdAt";
+
+        const sortOrder =
+            req.query.sortOrder === "asc"
+                ? 1
+                : -1;
+
+
+        if (!allowedSortFields.includes(sortBy)) {
+            throw new AppError("INVALID_DELIVERY_PERSON");
+        }
+
+
+        const sort = {
+            [sortBy]: sortOrder
+        };
+
+
+        // ==========================================
+        // GET DATA
+        // ==========================================
+
+        const result =
+            await deliveryPersonRepository.getPaginated({
+                page,
+                limit,
+                filters,
+                sort
+            });
+
+
+        // ==========================================
+        // RESPONSE
+        // ==========================================
 
         res.json({
             status: "success",
-            payload: deliveryPersons
+            payload: result
         });
 
     } catch (error) {
@@ -47,16 +150,20 @@ const getDeliveryPersonById = async (req, res, next) => {
 
         const { id } = req.params;
 
+
         if (!mongoose.Types.ObjectId.isValid(id)) {
             throw new AppError("INVALID_DELIVERY_PERSON");
         }
 
+
         const deliveryPerson =
             await deliveryPersonRepository.getById(id);
+
 
         if (!deliveryPerson) {
             throw new AppError("DELIVERY_PERSON_NOT_FOUND");
         }
+
 
         res.json({
             status: "success",
