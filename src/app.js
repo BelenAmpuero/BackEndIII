@@ -27,6 +27,16 @@ app.get("/api/docs-json", (req, res) => {
   res.json(swaggerSpecs);
 });
 
+app.get("/api/health", (req, res) => {
+  
+  res.json({
+    status: "OK",
+    environment: process.env.NODE_ENV || "development",
+    uptime: process.uptime(),
+    timestamp: new Date()
+  }); 
+});
+
 app.use(
   "/api/docs",
   swaggerUi.serve,
