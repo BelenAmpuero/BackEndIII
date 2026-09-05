@@ -19,7 +19,7 @@ const logLevel =
   process.env.LOG_LEVEL || (isProd ? "info" : "debug");
 
 module.exports = {
-  PORT: process.env.PORT || 3000,
+  PORT: process.env.PORT,
   MONGODB_URI: process.env.MONGODB_URI,
   NODE_ENV,
   isProd,

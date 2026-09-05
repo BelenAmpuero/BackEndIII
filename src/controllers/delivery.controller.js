@@ -17,9 +17,6 @@ const {
 } = require("../utils/constants");
 
 
-// ==========================================
-// GET ALL DELIVERIES (Con paginación y filtros)
-// ==========================================
 
 const getDeliveries = async (req, res, next) => {
     try {
@@ -73,11 +70,6 @@ const getDeliveries = async (req, res, next) => {
     }
 };
 
-
-// ==========================================
-// GET DELIVERY BY ID
-// ==========================================
-
 const getDeliveryById = async (req, res, next) => {
 
     try {
@@ -108,10 +100,6 @@ const getDeliveryById = async (req, res, next) => {
 };
 
 
-// ==========================================
-// CREATE DELIVERY
-// ==========================================
-
 const createDelivery = async (req, res, next) => {
 
     try {
@@ -124,7 +112,7 @@ const createDelivery = async (req, res, next) => {
 
 
         if (!order || !deliveryPerson) {
-            console.log("Falta order o deliveryPerson");
+            logger.warning("Falta order o deliveryPerson");
 
 
             throw new AppError("DELIVERY_ASSIGNMENT_FAILED");
@@ -206,10 +194,6 @@ const createDelivery = async (req, res, next) => {
     }
 };
 
-
-// ==========================================
-// UPDATE DELIVERY STATUS
-// ==========================================
 
 const updateDeliveryStatus = async (req, res, next) => {
 

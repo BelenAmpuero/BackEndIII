@@ -21,13 +21,6 @@ const getDeliveryPersons = async (req, res, next) => {
 
     try {
 
-        
-        console.log("QUERY RECIBIDA:", req.query);
-
-        // ==========================================
-        // PAGINATION
-        // ==========================================
-
         const page = Math.max(
             parseInt(req.query.page) || 1,
             1

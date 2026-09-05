@@ -1,20 +1,29 @@
-# ShipNow - Mocking, manejo profesional de errores, logging y documentación Swagger
+# ShipNow - API REST con Node.js, Express y MongoDB
 
-API desarrollada con Node.js, Express y MongoDB para la generación de datos simulados y su posterior carga en la base de datos.
+API desarrollada con **Node.js, Express y MongoDB** para la gestión de usuarios, órdenes, repartidores y entregas.
 
-El proyecto implementa una arquitectura por capas y permite gestionar usuarios, órdenes, repartidores y entregas, respetando los modelos y constantes definidos en la aplicación.
+El proyecto implementa una **arquitectura por capas** y cuenta con generación de datos simulados, manejo profesional de errores, logging centralizado, documentación Swagger/OpenAPI, testing funcional, configuración por entornos y containerización mediante Docker.
 
-Además, cuenta con:
+## Características principales
 
-* Una capa centralizada de manejo de errores mediante errores personalizados.
-* Un diccionario de códigos de error.
-* Un middleware global para devolver respuestas HTTP consistentes.
-* Un sistema de logging centralizado utilizando Winston.
-* Persistencia de logs en archivos.
-* Rotación de archivos de logs.
-* Diferentes niveles de logging según la importancia del evento y el entorno de ejecución.
-* Endpoints de prueba para verificar el funcionamiento de los diferentes niveles de logging.
-* Documentación interactiva de la API mediante Swagger UI y OpenAPI 3.0.
+* Arquitectura por capas.
+* Persistencia mediante MongoDB y Mongoose.
+* Generación de datos simulados utilizando Faker.
+* Manejo centralizado de errores mediante `AppError`.
+* Diccionario centralizado de códigos de error.
+* Middleware global para respuestas de error consistentes.
+* Logging centralizado mediante Winston.
+* Persistencia y rotación de archivos de logs.
+* Diferentes niveles de logging según el entorno.
+* Endpoints de prueba para validar el sistema de logging.
+* Documentación interactiva mediante Swagger UI y OpenAPI 3.0.
+* Tests funcionales con Mocha, Chai y Supertest.
+* Entorno de testing separado del entorno de desarrollo.
+* Endpoint de health check.
+* Paginación y límites en endpoints de consulta de grandes volúmenes.
+* Configuración mediante variables de entorno.
+* Validación de variables críticas al iniciar la aplicación.
+* Containerización mediante Docker.
 
 ---
 
@@ -31,9 +40,10 @@ Además, cuenta con:
 * winston-daily-rotate-file
 * swagger-jsdoc
 * swagger-ui-express
-* mocka
-* chai
-* supertest
+* Mocha
+* Chai
+* Supertest
+* Docker
 
 ---
 
@@ -42,16 +52,16 @@ Además, cuenta con:
 Clonar el repositorio:
 
 ```bash
-git clone URL_DEL_REPOSITORIO
+git clone https://github.com/BelenAmpuero/BackEndIII.git
 ```
 
 Ingresar al proyecto:
 
 ```bash
-cd nombre-del-proyecto
+cd BackEndIII
 ```
 
-Instalar dependencias:
+Instalar las dependencias:
 
 ```bash
 npm install
@@ -61,42 +71,87 @@ npm install
 
 # Variables de entorno
 
+La aplicación utiliza variables de entorno para evitar almacenar configuraciones y credenciales sensibles directamente en el código fuente.
+
 Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
 PORT=8080
+
 MONGODB_URI=tu_url_de_mongodb
+
+SESSION_SECRET=tu_secret
+
 NODE_ENV=development
+
 LOG_LEVEL=debug
 ```
-
-Para el entorno de testing, crear un archivo .env.test en la raíz:
-
-PORT=8080
-MONGODB_URI_TEST=mongodb://localhost:27017/shipnow-test
-NODE_ENV=test
-LOG_LEVEL=error
 
 ## Variables utilizadas
 
 * `PORT`: puerto en el que se ejecuta el servidor.
-* `MONGODB_URI`: cadena de conexión a MongoDB para desarrollo y testing respectivamente.
-* `NODE_ENV`: define el entorno de ejecución (`development` `production` o `test`).
+* `MONGODB_URI`: cadena de conexión utilizada para conectarse a MongoDB.
+* `SESSION_SECRET`: secreto utilizado por los mecanismos de sesión cuando corresponde.
+* `NODE_ENV`: define el entorno de ejecución. Puede ser `development`, `test` o `production`.
 * `LOG_LEVEL`: define el nivel mínimo de logging.
 
+## Entorno de testing
 
+El proyecto utiliza un archivo `.env.test` separado para ejecutar las pruebas.
 
-> Los archivos `.env`y `.env.test`  contiene información sensible y no debe subirse al repositorio.
+Ejemplo:
+
+```env
+PORT=8080
+
+MONGODB_URI=tu_url_de_mongodb_de_test
+
+NODE_ENV=test
+
+LOG_LEVEL=error
+```
+
+El entorno de testing utiliza una base de datos independiente para evitar afectar los datos utilizados durante el desarrollo.
+
+La aplicación carga `.env.test` automáticamente cuando:
+
+```env
+NODE_ENV=test
+```
+
+## Producción
+
+No es necesario almacenar un `.env.production` dentro del repositorio.
+
+En un entorno productivo, las variables deben ser proporcionadas externamente por el servidor, plataforma de despliegue o contenedor.
+
+Ejemplo de configuración:
+
+```env
+PORT=8080
+MONGODB_URI=tu_url_de_mongodb
+NODE_ENV=production
+LOG_LEVEL=info
+```
+
+De esta manera, las credenciales y configuraciones sensibles no forman parte del código fuente.
+
+> Los archivos `.env` y `.env.test` contienen información sensible y no deben subirse al repositorio.
 
 ---
 
-
-# Ejecución
+# Ejecución local
 
 Para iniciar el servidor en modo desarrollo:
 
 ```bash
 npm run dev
+```
+
+Para iniciar el servidor directamente:
+
+```bash
+npm start
 ```
 
 Por defecto, la API se ejecuta en:
@@ -107,27 +162,53 @@ http://localhost:8080
 
 ---
 
+# Health Check
+
+La API cuenta con un endpoint de health check para comprobar rápidamente que la aplicación se encuentra funcionando:
+
+```http
+GET /api/health
+```
+
+Ejemplo de respuesta:
+
+```json
+{
+  "status": "OK",
+  "environment": "development",
+  "uptime": 123.456,
+  "timestamp": "2026-09-04T23:00:00.000Z"
+}
+```
+
+El endpoint informa:
+
+* Estado de la aplicación.
+* Entorno de ejecución.
+* Tiempo de actividad del proceso.
+* Timestamp de la consulta.
+
+No expone información sensible ni credenciales.
+
+---
+
 # Documentación Swagger
 
-El proyecto cuenta con documentación interactiva de la API utilizando Swagger UI y OpenAPI 3.0.
+El proyecto cuenta con documentación interactiva de la API utilizando **Swagger UI y OpenAPI 3.0**.
 
 La documentación está disponible en:
 
-```text
 http://localhost:8080/api/docs
-```
 
-Desde Swagger UI es posible consultar y probar los endpoints documentados directamente desde el navegador.
+Desde Swagger UI es posible consultar y probar los endpoints documentados directamente desde el navegador utilizando **Try it out**.
 
 La especificación OpenAPI también puede consultarse en formato JSON mediante:
 
-```text
 http://localhost:8080/api/docs-json
-```
 
 ## Módulos documentados
 
-Actualmente la documentación incluye los siguientes módulos:
+Actualmente la documentación incluye:
 
 * **Mocks**
 * **Logger**
@@ -177,8 +258,6 @@ Los usuarios cuentan con información personal y un rol que determina su tipo de
 
 Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Users**.
 
-Entre las operaciones disponibles se encuentran:
-
 ```http
 GET /api/users
 GET /api/users/:id
@@ -186,6 +265,8 @@ POST /api/users
 ```
 
 Los endpoints realizan las validaciones correspondientes y utilizan el sistema centralizado de manejo de errores.
+
+Los endpoints de listado cuentan con mecanismos de consulta controlada para evitar recuperar cantidades ilimitadas de registros.
 
 ---
 
@@ -204,15 +285,13 @@ Cada pedido contiene:
 * Estado.
 * Prioridad.
 
-Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Orders**.
-
 ## Obtener todos los pedidos
 
 ```http
 GET /api/orders
 ```
 
-Obtiene la lista de pedidos registrados en MongoDB.
+Obtiene los pedidos registrados en MongoDB utilizando mecanismos de consulta controlada.
 
 ## Obtener un pedido por ID
 
@@ -289,7 +368,7 @@ Body:
 }
 ```
 
-Los estados disponibles son:
+Estados disponibles:
 
 ```text
 pending
@@ -312,7 +391,7 @@ Los repartidores se encuentran asociados a usuarios y cuentan con información s
 
 Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Delivery Persons**.
 
-Las operaciones y validaciones correspondientes pueden consultarse directamente desde Swagger UI.
+Las operaciones, filtros, paginación y validaciones correspondientes pueden consultarse directamente desde Swagger UI.
 
 ---
 
@@ -328,7 +407,59 @@ Las entregas relacionan:
 
 Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Deliveries**.
 
-Las operaciones y estados disponibles pueden consultarse y probarse directamente desde Swagger UI.
+Las operaciones, filtros, paginación y estados disponibles pueden consultarse y probarse directamente desde Swagger UI.
+
+---
+
+# Performance y escalabilidad
+
+Como parte de la preparación de la API para un entorno de ejecución más estable, se incorporaron medidas básicas de control de rendimiento.
+
+## Paginación
+
+Los endpoints que trabajan con grandes cantidades de registros utilizan mecanismos de paginación y límites para evitar recuperar colecciones completas de manera descontrolada.
+
+Endopints que trabajan con paginación:
+
+- users
+- orders
+- deliveries 
+- deliveryPersons
+
+La paginación utiliza parámetros como:
+
+```text
+page
+limit
+```
+
+Ejemplo:
+
+```http
+GET /api/deliveryPersons?page=1&limit=5
+```
+
+También se contemplan filtros y criterios de ordenamiento en los endpoints que los soportan.
+
+Los límites evitan que un cliente solicite cantidades excesivamente grandes de registros en una única consulta.
+
+## Consultas controladas
+
+Las consultas a MongoDB utilizan mecanismos como:
+
+* `skip()`
+* `limit()`
+* `countDocuments()`
+* filtros
+* ordenamiento controlado
+
+Esto permite reducir el volumen de información transferida y procesada en cada solicitud.
+
+## Logging
+
+Se evita utilizar logging excesivo en operaciones normales.
+
+Los registros de aplicación se gestionan mediante Winston y el nivel puede modificarse según el entorno utilizando `LOG_LEVEL`.
 
 ---
 
@@ -338,13 +469,11 @@ El proyecto cuenta con un sistema centralizado de manejo de errores que utiliza:
 
 * `AppError`.
 * Un diccionario de códigos de error.
-* Un middleware global `errorHandler`.
+* Middleware global `errorHandler`.
 
 Los errores controlados son procesados por el middleware y devueltos al cliente utilizando una estructura JSON consistente.
 
 ## Estructura de respuesta de error
-
-Una respuesta de error tiene el siguiente formato:
 
 ```json
 {
@@ -368,7 +497,7 @@ Los errores inesperados del servidor utilizan:
 500 Internal Server Error
 ```
 
-con una respuesta de este tipo:
+con una respuesta como:
 
 ```json
 {
@@ -381,8 +510,6 @@ con una respuesta de este tipo:
 ---
 
 # Principales códigos de error
-
-El proyecto contempla diferentes códigos de error relacionados con las entidades y operaciones implementadas.
 
 ## Users
 
@@ -422,7 +549,7 @@ El proyecto contempla diferentes códigos de error relacionados con las entidade
 
 # Ejemplo de error de validación
 
-Si se intenta generar una cantidad inválida de mocks, por ejemplo `0`, un número negativo o un valor que no sea un número entero válido:
+Si se intenta generar una cantidad inválida de mocks:
 
 ```http
 GET /api/mocks/mockingusers?qty=0
@@ -466,27 +593,6 @@ Genera usuarios simulados sin almacenarlos en MongoDB.
 
 El parámetro `qty` permite indicar la cantidad de usuarios a generar.
 
-Ejemplo de respuesta:
-
-```json
-{
-  "status": "success",
-  "payload": [
-    {
-      "_id": "ObjectId",
-      "name": "Nombre generado",
-      "email": "usuario@example.com",
-      "password": "hash",
-      "role": "user",
-      "phone": "123456789",
-      "address": "Dirección generada"
-    }
-  ]
-}
-```
-
----
-
 ## Generar órdenes
 
 ```http
@@ -505,8 +611,6 @@ Cada orden contiene:
 * Dirección de entrega.
 * Estado.
 * Prioridad.
-
----
 
 ## Generar y guardar datos
 
@@ -552,8 +656,6 @@ El logger permite registrar diferentes tipos de eventos según su importancia y 
 
 ## Niveles de log
 
-ShipNow utiliza los siguientes niveles personalizados:
-
 | Nivel     | Descripción                                                                         |
 | --------- | ----------------------------------------------------------------------------------- |
 | `fatal`   | Fallas críticas que pueden impedir el funcionamiento de la aplicación.              |
@@ -578,46 +680,42 @@ debug
 
 # Configuración según el entorno
 
-El comportamiento del logger depende de las variables de entorno `NODE_ENV` y `LOG_LEVEL`.
+El comportamiento del logger depende de las variables `NODE_ENV` y `LOG_LEVEL`.
 
 ## Desarrollo
-
-En desarrollo se puede utilizar:
 
 ```env
 NODE_ENV=development
 LOG_LEVEL=debug
 ```
 
-Esto permite visualizar todos los niveles disponibles:
+Permite visualizar todos los niveles disponibles.
 
-```text
-debug
-http
-info
-warning
-error
-fatal
+## Testing
+
+```env
+NODE_ENV=test
+LOG_LEVEL=error
 ```
 
-## Producción
+Se utiliza un nivel más restrictivo para evitar generar una cantidad innecesaria de logs durante las pruebas.
 
-En producción se recomienda utilizar:
+## Producción
 
 ```env
 NODE_ENV=production
 LOG_LEVEL=info
 ```
 
-De esta manera se reducen los mensajes menos relevantes y se registran principalmente eventos importantes.
+En producción se recomienda utilizar `info` como nivel mínimo para reducir mensajes de debugging y conservar principalmente información relevante de operación.
 
-El nivel puede modificarse mediante `LOG_LEVEL` sin necesidad de modificar la configuración del logger.
+El nivel puede modificarse mediante `LOG_LEVEL` sin necesidad de modificar el código del logger.
 
 ---
 
 # Persistencia de logs
 
-Los logs también se almacenan en archivos dentro de la carpeta:
+Los logs también se almacenan en archivos dentro de:
 
 ```text
 logs/
@@ -629,22 +727,9 @@ La configuración utiliza archivos separados según su propósito.
 
 El archivo `combined` almacena los eventos registrados por la aplicación según el nivel configurado.
 
-Puede contener registros como:
-
-```text
-debug
-http
-info
-warning
-error
-fatal
-```
-
-Los archivos se generan mediante una estrategia de rotación.
-
 ## Archivo de errores
 
-El archivo de errores almacena los eventos correspondientes a los niveles:
+El archivo de errores almacena los eventos correspondientes a:
 
 ```text
 error
@@ -673,7 +758,7 @@ Esto permite mantener separados los registros correspondientes a diferentes per�
 
 Para comprobar el funcionamiento de Winston se incorporó un router específico de prueba:
 
-```http
+```text
 /api/loggerTest
 ```
 
@@ -681,30 +766,11 @@ Este módulo permite generar registros de todos los niveles disponibles.
 
 > Estos endpoints son únicamente herramientas de validación del sistema de logging y no representan funcionalidades de negocio.
 
----
-
 ## DEBUG
 
 ```http
 GET /api/loggerTest/debug
 ```
-
-Genera un log:
-
-```text
-[debug] Mensaje de prueba - DEBUG
-```
-
-Respuesta:
-
-```json
-{
-  "status": "success",
-  "message": "Log DEBUG generado correctamente"
-}
-```
-
----
 
 ## HTTP
 
@@ -712,45 +778,11 @@ Respuesta:
 GET /api/loggerTest/http
 ```
 
-Genera un log:
-
-```text
-[http] Mensaje de prueba - HTTP
-```
-
-Respuesta:
-
-```json
-{
-  "status": "success",
-  "message": "Log HTTP generado correctamente"
-}
-```
-
----
-
 ## INFO
 
 ```http
 GET /api/loggerTest/info
 ```
-
-Genera un log:
-
-```text
-[info] Mensaje de prueba - INFO
-```
-
-Respuesta:
-
-```json
-{
-  "status": "success",
-  "message": "Log INFO generado correctamente"
-}
-```
-
----
 
 ## WARNING
 
@@ -758,65 +790,16 @@ Respuesta:
 GET /api/loggerTest/warn
 ```
 
-Genera un log:
-
-```text
-[warning] Mensaje de prueba - WARNING
-```
-
-Respuesta:
-
-```json
-{
-  "status": "success",
-  "message": "Log WARNING generado correctamente"
-}
-```
-
----
-
 ## ERROR
 
 ```http
 GET /api/loggerTest/error
 ```
 
-Genera un log:
-
-```text
-[error] Mensaje de prueba - ERROR
-```
-
-Respuesta:
-
-```json
-{
-  "status": "success",
-  "message": "Log ERROR generado correctamente"
-}
-```
-
----
-
 ## FATAL
 
 ```http
 GET /api/loggerTest/fatal
-```
-
-Genera un log:
-
-```text
-[fatal] Mensaje de prueba - FATAL
-```
-
-Respuesta:
-
-```json
-{
-  "status": "success",
-  "message": "Log FATAL generado correctamente"
-}
 ```
 
 Los endpoints `/error` y `/fatal` registran eventos con esos niveles, pero no representan necesariamente un error HTTP.
@@ -825,26 +808,204 @@ Por este motivo, pueden responder `200 OK` después de generar correctamente el 
 
 ---
 
+# Entornos y preparación para producción
+
+La aplicación diferencia entre los siguientes entornos:
+
+```text
+development
+test
+production
+```
+
+Las configuraciones específicas se proporcionan mediante variables de entorno.
+
+Las variables críticas son validadas durante el inicio de la aplicación.
+
+Si falta una variable crítica necesaria para iniciar correctamente el servidor, la aplicación registra un error y finaliza el proceso.
+
+Esto evita iniciar la aplicación en un estado incompleto.
+
+## Endpoints internos
+
+Los siguientes endpoints son herramientas internas de desarrollo y testing:
+
+```text
+/api/mocks
+/api/loggerTest
+```
+
+No representan funcionalidades principales del negocio.
+
+En un despliegue productivo se recomienda restringir o deshabilitar estos endpoints según las necesidades del entorno.
+
+Swagger puede mantenerse disponible para documentación y validación de la API, dependiendo de la política de exposición definida para el entorno productivo.
+
+---
+
+# Testing
+
+El proyecto cuenta con una suite de tests funcionales automatizados que valida los endpoints principales de ShipNow, cubriendo casos exitosos y errores esperados.
+
+Herramientas utilizadas:
+
+* **Mocha:** framework de pruebas para organizar y ejecutar los tests.
+* **Chai:** librería de aserciones para validar estados HTTP, estructura del body y propiedades.
+* **Supertest:** permite realizar peticiones HTTP sobre la aplicación Express sin abrir puertos manualmente.
+
+## Entorno de testing
+
+El entorno está separado del desarrollo mediante:
+
+* Un archivo `.env.test`.
+* Una base de datos independiente.
+* Una estrategia de limpieza de datos para mantener las pruebas controladas y repetibles.
+
+## Ejecutar los tests
+
+```bash
+npm test
+```
+
+## Módulos cubiertos
+
+* **Users:** listado, obtención por ID y validación de casos de error.
+* **Orders:** creación, listado, obtención por ID, actualización de estados y validación de errores.
+* **Mocks:** generación de usuarios y órdenes simuladas y persistencia de datos de prueba.
+* **Logger:** verificación de los endpoints de prueba de logging.
+* **Swagger:** comprobación de la accesibilidad de la documentación interactiva.
+
+---
+
+# Docker
+
+La aplicación está preparada para ejecutarse dentro de un contenedor Docker.
+
+## Dockerfile
+
+El proyecto utiliza una imagen oficial de Node.js como base.
+
+El Dockerfile:
+
+* Utiliza Node.js.
+* Define `/app` como directorio de trabajo.
+* Copia `package.json` y `package-lock.json`.
+* Instala las dependencias necesarias para ejecución.
+* Copia el código fuente.
+* Expone el puerto `8080`.
+* Ejecuta la aplicación mediante `npm start`.
+
+## Construir la imagen
+
+Desde la raíz del proyecto:
+
+```bash
+docker build -t shipnow .
+```
+
+Esto genera una imagen denominada:
+
+```text
+shipnow:latest
+```
+
+## Ejecutar el contenedor
+
+Las variables de entorno se proporcionan externamente mediante un archivo `.env`.
+
+```bash
+docker run --env-file .env -p 8080:8080 --name shipnow-api shipnow
+```
+
+El puerto se publica de la siguiente manera:
+
+```text
+8080 del host → 8080 del contenedor
+```
+
+## Verificar el contenedor
+
+Para comprobar que el contenedor está ejecutándose:
+
+```bash
+docker ps
+```
+
+La aplicación debe mostrar un mapeo similar a:
+
+```text
+0.0.0.0:8080->8080/tcp
+```
+
+## Logs del contenedor
+
+Para consultar los logs:
+
+```bash
+docker logs shipnow-api
+```
+
+Al iniciar correctamente, se espera visualizar mensajes similares a:
+
+```text
+[info] MongoDB conectado
+[info] Servidor escuchando en el puerto 8080
+```
+
+## Health check dentro de Docker
+
+Con el contenedor ejecutándose:
+
+```text
+http://localhost:8080/api/health
+```
+
+## Swagger dentro de Docker
+
+La documentación se encuentra disponible en:
+
+```text
+http://localhost:8080/api/docs
+```
+
+La API también puede probarse desde Swagger mediante **Try it out**.
+
+---
+
+# .dockerignore
+
+El proyecto cuenta con un `.dockerignore` para evitar incorporar archivos innecesarios o sensibles a la imagen.
+
+Actualmente se excluyen elementos como:
+
+```text
+node_modules
+npm-debug.log
+.env
+.env.test
+.env.development
+.git
+.gitignore
+logs
+uploads
+coverage
+tmp
+README.md
+```
+
+Esto permite reducir el contenido de la imagen y evita incluir credenciales, logs generados, archivos temporales y otros recursos que no son necesarios para ejecutar la aplicación.
+
+Las variables de entorno son proporcionadas externamente al contenedor.
+
+---
+
 # Ejemplo de salida
 
 En desarrollo, los registros pueden visualizarse en consola con timestamp, nivel y mensaje:
 
 ```text
-2026-08-24 19:00:13 [info] MongoDB conectado
-
-2026-08-24 19:00:13 [info] Servidor escuchando en el puerto 8080
-
-2026-08-24 19:05:21 [debug] Mensaje de prueba - DEBUG
-
-2026-08-24 19:05:25 [http] Mensaje de prueba - HTTP
-
-2026-08-24 19:05:30 [info] Mensaje de prueba - INFO
-
-2026-08-24 19:05:35 [warning] Mensaje de prueba - WARNING
-
-2026-08-24 19:05:40 [error] Mensaje de prueba - ERROR
-
-2026-08-24 19:05:45 [fatal] Mensaje de prueba - FATAL
+2026-09-04 23:25:23 [info] MongoDB conectado
+2026-09-04 23:25:23 [info] Servidor escuchando en el puerto 8080
 ```
 
 Los registros también se almacenan en la carpeta `logs/` según la configuración de los transports.
@@ -953,44 +1114,13 @@ Los datos generados respetan los modelos y las constantes definidas en el proyec
 
 ---
 
-# Ejemplo completo
-
-Generación y persistencia de datos de prueba:
-
-```http
-POST /api/mocks/generatedata?qty=10
-```
-
-Respuesta:
-
-```json
-{
-  "status": "success",
-  "message": "Datos de prueba generados correctamente",
-  "inserted": {
-    "users": 10,
-    "orders": 10,
-    "deliveryPersons": 10,
-    "deliveries": 10
-  }
-}
-```
-
-Durante la operación, los eventos importantes quedan registrados mediante Winston para facilitar el monitoreo y debugging de la aplicación.
-
----
-
 # Pruebas con Swagger
 
 Una vez iniciado el servidor, ingresar a:
 
-```text
 http://localhost:8080/api/docs
-```
 
 Desde Swagger UI se pueden ejecutar los endpoints disponibles utilizando el botón **Try it out**.
-
-Se recomienda probar los siguientes endpoints:
 
 ## Users
 
@@ -1008,6 +1138,14 @@ GET /api/orders/:id
 POST /api/orders
 PATCH /api/orders/:id/status
 ```
+
+## Delivery Persons
+
+Consultar los endpoints disponibles en la sección **Delivery Persons**.
+
+## Deliveries
+
+Consultar los endpoints disponibles en la sección **Deliveries**.
 
 ## Mocking
 
@@ -1028,59 +1166,14 @@ GET /api/loggerTest/error
 GET /api/loggerTest/fatal
 ```
 
-También se pueden comprobar los errores de validación utilizando cantidades inválidas, por ejemplo:
+También pueden comprobarse errores de validación utilizando cantidades inválidas:
 
 ```text
 GET /api/mocks/mockingusers?qty=0
-
 GET /api/mocks/mockingusers?qty=-5
-
 GET /api/mocks/mockingorders?qty=abc
-
 POST /api/mocks/generatedata?qty=hola
 ```
-
-Los endpoints de **Delivery Persons** y **Deliveries** también pueden probarse directamente desde sus respectivas secciones en Swagger UI.
-
----
-# Testing
-
-El proyecto cuenta con una suite de tests funcionales automatizados que validan los endpoints principales de ShipNow, cubriendo casos exitosos y errores esperados.
-
-Herramientas utilizadas:
-
-* Mocha: Framework de pruebas para organizar y ejecutar los tests.
-
-* Chai: Librería de aserciones para validar el estado HTTP, la estructura del body y sus propiedades.
-
-* Supertest: Permite realizar peticiones HTTP sobre la app Express de forma aislada sin abrir puertos manualmente.
-
-# Entorno de testing
-
-El entorno está completamente separado del de desarrollo mediante:
-
-Un archivo de configuración dedicado (.env.test).
-
-Una base de datos independiente (shipnow-test) para garantizar datos controlados, repetibles y descartables mediante una estrategia de limpieza automática antes y después de las pruebas.
-
-# Cómo ejecutar los tests
-
-Para correr la suite de pruebas automatizadas, ejecutar:
-
-npm test
-
-# Módulos cubiertos
-
-* Users: Listado de usuarios, obtención por ID y validación de casos de error.
-
-* Orders: Creación con datos válidos, listado, obtención por ID, actualización de estados y validación de errores (datos incompletos, recursos inexistentes, estados inválidos).
-
-* Mocks: Generación de usuarios y órdenes simuladas, y persistencia de datos de prueba en la base de datos de test (/api/mocks).
-
-* Logger: Verificación de los endpoints de prueba de logging (/api/loggerTest).
-
-* Swagger: Comprobación de la accesibilidad de la ruta de documentación interactiva (/api/docs).
-
 
 ---
 
@@ -1090,15 +1183,45 @@ Los siguientes archivos y carpetas no deben subirse al repositorio:
 
 ```gitignore
 node_modules/
-
 .env
-
-logs/
-
 .env.test
-
+logs/
+uploads/
+coverage/
+tmp/
 ```
 
-Los archivos `.env` y `.env.test` contienen las variables de entorno y credenciales necesarias para la aplicación.
+El archivo `.env.example` puede utilizarse como referencia para conocer las variables necesarias sin exponer valores reales.
 
-La carpeta `logs/` contiene archivos generados automáticamente por Winston y no forma parte del código fuente del proyecto.
+Los archivos `.env` y `.env.test` pueden contener credenciales y configuraciones sensibles.
+
+La carpeta `logs/` contiene archivos generados automáticamente por Winston y no forma parte del código fuente.
+
+---
+
+# Estado de la aplicación
+
+La aplicación se encuentra preparada para:
+
+* Ejecución local.
+* Testing funcional automatizado.
+* Documentación mediante Swagger/OpenAPI.
+* Generación de datos simulados.
+* Manejo centralizado de errores.
+* Logging centralizado y rotativo.
+* Configuración por entornos.
+* Health check.
+* Consultas con paginación y límites.
+* Ejecución dentro de un contenedor Docker.
+
+La imagen Docker puede construirse mediante:
+
+```bash
+docker build -t shipnow .
+```
+
+y ejecutarse mediante:
+
+```bash
+docker run --env-file .env -p 8080:8080 --name shipnow-api shipnow
+```

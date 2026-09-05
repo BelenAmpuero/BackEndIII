@@ -1,10 +1,10 @@
 const app = require("./app");
 const connectDB = require("./config/db");
-const { PORT, MONGO_URI } = require("./config/env.config");
+const { PORT, MONGODB_URI } = require("./config/env.config");
 const logger = require("./utils/logger/logger");
 
 // 1. Validar variables de entorno críticas antes de arrancar
-if (!PORT || !MONGO_URI) {
+if (!PORT || !MONGODB_URI) {
     logger.error("❌ Error crítico: Faltan variables de entorno obligatorias (PORT o MONGO_URI).");
     process.exit(1);
 }
