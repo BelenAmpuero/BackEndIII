@@ -2,3 +2,5 @@ node_modules/
 .env
 logs/
 .env.test
+uploads/*
+!uploads/.gitkeep
