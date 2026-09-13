@@ -26,7 +26,7 @@ const documentSchema = new Schema({
     required: true
   },
 
-  type: {
+  documentType: {
     type: String,
     required: true
   },
@@ -34,16 +34,7 @@ const documentSchema = new Schema({
   uploadedAt: {
     type: Date,
     default: Date.now
-  },
-
-  proof: {
-    originalName: String,
-    fileName: String,
-    path: String,
-    mimeType: String,
-    size: Number,
-    uploadedAt: Date
   }
-})
+});
 
-module.exports = model("Documnet", documentSchema);
+module.exports = model("Document", documentSchema);

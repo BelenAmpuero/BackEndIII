@@ -1,6 +1,5 @@
 const { Schema, model } = require('mongoose')
 const { ROLES } = require('../utils/constants')
-const documentSchema = require('./document.model')
 
 const userSchema = new Schema(
   {
@@ -35,10 +34,12 @@ const userSchema = new Schema(
       type: String
     },
 
-    documents: {
-      type: [documentSchema],
-      default: []
-    }
+ documents: [
+  {
+    type: Schema.Types.ObjectId,
+    ref: 'Document'
+  }
+]
   },
   {
     timestamps: true

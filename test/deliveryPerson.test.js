@@ -35,38 +35,52 @@ describe("DeliveryPerson API", () => {
 
     it("debería obtener todos los repartidores", async () => {
 
-        const user = await User.create({
-            name: "Usuario Test",
-            email: "delivery@test.com",
-            password: "123456"
-        });
-
-        await DeliveryPerson.create({
-            user: user._id,
-            vehicle: {
-                kind: "moto",
-                plate: "ABC123"
-            }
-        });
-
-        const response = await request(app)
-            .get("/api/deliveryPersons");
-
-        expect(response.status).to.equal(200);
-
-        expect(response.body).to.have.property("status");
-        expect(response.body.status).to.equal("success");
-
-        expect(response.body).to.have.property("payload");
-        expect(response.body.payload).to.be.an("array");
-
-        expect(response.body.payload).to.have.lengthOf(1);
-
-        expect(response.body.payload[0]).to.have.property("_id");
-        expect(response.body.payload[0]).to.have.property("user");
-        expect(response.body.payload[0]).to.have.property("vehicle");
+    const user = await User.create({
+        name: "Usuario Test",
+        email: "delivery@test.com",
+        password: "123456"
     });
 
+    await DeliveryPerson.create({
+        user: user._id,
+        vehicle: {
+            kind: "moto",
+            plate: "ABC123"
+        }
+    });
+
+    const response = await request(app)
+        .get("/api/deliveryPersons");
+
+    expect(response.status).to.equal(200);
+
+    expect(response.body).to.have.property("status");
+    expect(response.body.status).to.equal("success");
+
+    expect(response.body).to.have.property("payload");
+    expect(response.body.payload).to.be.an("object");
+
+    expect(response.body.payload).to.have.property("data");
+    expect(response.body.payload.data).to.be.an("array");
+
+    expect(response.body.payload.data).to.have.lengthOf(1);
+
+    expect(response.body.payload.data[0]).to.have.property("_id");
+    expect(response.body.payload.data[0]).to.have.property("user");
+    expect(response.body.payload.data[0]).to.have.property("vehicle");
+
+    expect(response.body.payload).to.have.property("total");
+    expect(response.body.payload.total).to.equal(1);
+
+    expect(response.body.payload).to.have.property("page");
+    expect(response.body.payload.page).to.equal(1);
+
+    expect(response.body.payload).to.have.property("limit");
+    expect(response.body.payload.limit).to.equal(10);
+
+    expect(response.body.payload).to.have.property("totalPages");
+    expect(response.body.payload.totalPages).to.equal(1);
+});
 
     // ==========================================
     // GET DELIVERY PERSON BY ID

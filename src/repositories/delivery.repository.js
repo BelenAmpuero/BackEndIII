@@ -16,6 +16,7 @@ class DeliveryRepository {
         const deliveries = await Delivery.find(filter)
             .populate("order")
             .populate("deliveryPerson")
+            .populate("receipt")
             .sort(sort)
             .skip(skip)
             .limit(limit);
@@ -37,7 +38,8 @@ class DeliveryRepository {
     async getById(id) {
         return await Delivery.findById(id)
             .populate("order")
-            .populate("deliveryPerson");
+            .populate("deliveryPerson")
+            .populate("receipt");
     }
 
     async create(deliveryData) {
@@ -54,14 +56,17 @@ class DeliveryRepository {
             }
         )
             .populate("order")
-            .populate("deliveryPerson");
+            .populate("deliveryPerson")
+            .populate("receipt");
     }
 
     async findPaginated(page = 1, limit = 10) {
         const skip = (page - 1) * limit;
+
         return await Delivery.find()
             .populate("order")
             .populate("deliveryPerson")
+            .populate("receipt")
             .skip(skip)
             .limit(limit);
     }

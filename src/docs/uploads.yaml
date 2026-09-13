@@ -1,0 +1,314 @@
+paths:
+
+  /api/users/{id}/documents:
+
+    post:
+      tags:
+        - Uploads
+
+      summary: Subir documento de usuario
+
+      description: >
+        Permite cargar un documento asociado a un usuario.
+        El archivo debe enviarse mediante multipart/form-data.
+        Se aceptan archivos JPG, PNG y PDF de hasta 5 MB.
+        El documento queda almacenado en el servidor y sus metadatos
+        se registran en la base de datos.
+
+      parameters:
+
+        - name: id
+          in: path
+          required: true
+          description: Identificador único del usuario
+
+          schema:
+            type: string
+            example: "64f1a2b3c4d5e6f789012345"
+
+      requestBody:
+        required: true
+
+        content:
+
+          multipart/form-data:
+
+            schema:
+              type: object
+
+              required:
+                - file
+                - documentType
+
+              properties:
+
+                file:
+                  type: string
+                  format: binary
+                  description: >
+                    Archivo a cargar. Se aceptan imágenes JPG, PNG
+                    y archivos PDF. Tamaño máximo 5 MB.
+
+                documentType:
+                  type: string
+                  description: Tipo de documento asociado al usuario
+
+                  enum:
+                    - user_document
+                    - driver_license
+
+                  example: user_document
+
+      responses:
+
+        "201":
+          description: Documento cargado correctamente
+
+          content:
+            application/json:
+
+              schema:
+                type: object
+
+                properties:
+
+                  status:
+                    type: string
+                    example: success
+
+                  payload:
+                    type: object
+
+                    properties:
+
+                      user:
+                        $ref: "#/components/schemas/User"
+
+                      document:
+                        $ref: "#/components/schemas/Document"
+
+        "400":
+          description: Error en los datos o archivo enviado
+
+          content:
+            application/json:
+
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+              examples:
+
+                FILE_REQUIRED:
+                  summary: Archivo obligatorio
+                  value:
+                    status: error
+                    code: FILE_REQUIRED
+                    message: "El archivo es obligatorio"
+
+                INVALID_FILE_TYPE:
+                  summary: Tipo de archivo inválido
+                  value:
+                    status: error
+                    code: INVALID_FILE_TYPE
+                    message: "El tipo de archivo no está permitido"
+
+                FILE_TOO_LARGE:
+                  summary: Archivo demasiado grande
+                  value:
+                    status: error
+                    code: FILE_TOO_LARGE
+                    message: "El archivo supera el tamaño máximo permitido"
+
+                INVALID_FILE_FIELD:
+                  summary: Campo de archivo inválido
+                  value:
+                    status: error
+                    code: INVALID_FILE_FIELD
+                    message: "El campo del archivo no es válido"
+
+                INVALID_DOCUMENT_TYPE:
+                  summary: Tipo de documento inválido
+                  value:
+                    status: error
+                    code: INVALID_DOCUMENT_TYPE
+                    message: "El tipo de documento no es válido"
+
+        "404":
+          description: Usuario no encontrado
+
+          content:
+            application/json:
+
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+              example:
+                status: error
+                code: USER_NOT_FOUND
+                message: "Usuario no encontrado"
+
+        "500":
+          description: Error al guardar el documento
+
+          content:
+            application/json:
+
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+              example:
+                status: error
+                code: DOCUMENT_SAVE_ERROR
+                message: "No se pudo guardar el documento"
+
+
+  /api/deliveries/{id}/receipt:
+
+    post:
+      tags:
+        - Uploads
+
+      summary: Subir comprobante de entrega
+
+      description: >
+        Permite cargar un comprobante asociado a una entrega.
+        El archivo debe enviarse mediante multipart/form-data.
+        Se aceptan archivos JPG, PNG y PDF de hasta 5 MB.
+        El archivo se almacena en el servidor y sus metadatos
+        se registran en la base de datos.
+        El comprobante queda asociado a la entrega indicada.
+
+      parameters:
+
+        - name: id
+          in: path
+          required: true
+          description: Identificador único de la entrega
+
+          schema:
+            type: string
+            example: "64f1a2b3c4d5e6f789012348"
+
+      requestBody:
+        required: true
+
+        content:
+
+          multipart/form-data:
+
+            schema:
+              type: object
+
+              required:
+                - file
+
+              properties:
+
+                file:
+                  type: string
+                  format: binary
+                  description: >
+                    Comprobante de entrega. Se aceptan imágenes JPG,
+                    PNG y archivos PDF. Tamaño máximo 5 MB.
+
+      responses:
+
+        "201":
+          description: Comprobante cargado y asociado correctamente
+
+          content:
+            application/json:
+
+              schema:
+                type: object
+
+                properties:
+
+                  status:
+                    type: string
+                    example: success
+
+                  payload:
+                    type: object
+
+                    properties:
+
+                      delivery:
+                        $ref: "#/components/schemas/Delivery"
+
+                      document:
+                        $ref: "#/components/schemas/Document"
+
+        "400":
+          description: Error en los datos o archivo enviado
+
+          content:
+            application/json:
+
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+              examples:
+
+                FILE_REQUIRED:
+                  summary: Archivo obligatorio
+                  value:
+                    status: error
+                    code: FILE_REQUIRED
+                    message: "El archivo es obligatorio"
+
+                INVALID_FILE_TYPE:
+                  summary: Tipo de archivo inválido
+                  value:
+                    status: error
+                    code: INVALID_FILE_TYPE
+                    message: "El tipo de archivo no está permitido"
+
+                FILE_TOO_LARGE:
+                  summary: Archivo demasiado grande
+                  value:
+                    status: error
+                    code: FILE_TOO_LARGE
+                    message: "El archivo supera el tamaño máximo permitido"
+
+                INVALID_FILE_FIELD:
+                  summary: Campo de archivo inválido
+                  value:
+                    status: error
+                    code: INVALID_FILE_FIELD
+                    message: "El campo del archivo no es válido"
+
+                INVALID_DELIVERY_DATA:
+                  summary: Datos de entrega inválidos
+                  value:
+                    status: error
+                    code: INVALID_DELIVERY_DATA
+                    message: "Los datos de la entrega no son válidos"
+
+        "404":
+          description: Entrega no encontrada
+
+          content:
+            application/json:
+
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+              example:
+                status: error
+                code: DELIVERY_NOT_FOUND
+                message: "Entrega no encontrada"
+
+        "500":
+          description: Error al guardar el comprobante
+
+          content:
+            application/json:
+
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+              example:
+                status: error
+                code: DOCUMENT_SAVE_ERROR
+                message: "No se pudo guardar el documento"

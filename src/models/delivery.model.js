@@ -28,6 +28,11 @@ const deliverySchema = new Schema(
 
     deliveredAt: {
       type: Date
+    },
+
+    receipt: {
+      type: Schema.Types.ObjectId,
+      ref: "Document"
     }
   },
   {

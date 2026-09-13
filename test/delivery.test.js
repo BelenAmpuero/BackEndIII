@@ -559,5 +559,140 @@ describe("Deliveries API", () => {
 
         expect(response.body).to.have.property("message");
     });
+describe("POST /api/deliveries/:id/receipt", () => {
 
+    it("debería subir un comprobante válido y asociarlo a la entrega", async () => {
+
+        const user = await User.create({
+            name: "Usuario Receipt",
+            email: "receipt@test.com",
+            password: "123456"
+        });
+
+        const order = await Order.create({
+            user: user._id,
+            items: [
+                {
+                    product: "Producto Test",
+                    quantity: 2,
+                    price: 100
+                }
+            ],
+            total: 200,
+            deliveryAddress: "Calle Test 123",
+            status: ORDER_STATUS.PENDING,
+            priority: ORDER_PRIORITY.LOW
+        });
+
+        const deliveryPerson = await DeliveryPerson.create({
+            user: user._id,
+            vehicle: {
+                kind: "moto",
+                plate: "ABC123"
+            }
+        });
+
+        const delivery = await Delivery.create({
+            order: order._id,
+            deliveryPerson: deliveryPerson._id
+        });
+
+        const response = await request(app)
+            .post(`/api/deliveries/${delivery._id}/receipt`)
+            .attach("file", "test/fixtures/test-image.jpg");
+
+        expect(response.status).to.equal(201);
+        expect(response.body.status).to.equal("success");
+
+        expect(response.body.payload).to.have.property("delivery");
+        expect(response.body.payload).to.have.property("document");
+
+        expect(response.body.payload.delivery.receipt)
+            .to.exist;
+
+        expect(response.body.payload.document)
+            .to.have.property("_id");
+
+        expect(response.body.payload.document.originalName)
+            .to.equal("test-image.jpg");
+
+        const updatedDelivery =
+            await Delivery.findById(delivery._id);
+
+        expect(updatedDelivery.receipt)
+            .to.exist;
+
+        expect(
+            updatedDelivery.receipt.toString()
+        ).to.equal(
+            response.body.payload.document._id.toString()
+        );
+    });
+
+
+    it("debería responder 400 si falta el archivo", async () => {
+
+        const user = await User.create({
+            name: "Usuario Sin Receipt",
+            email: "no-receipt@test.com",
+            password: "123456"
+        });
+
+        const order = await Order.create({
+            user: user._id,
+            items: [
+                {
+                    product: "Producto Test",
+                    quantity: 1,
+                    price: 100
+                }
+            ],
+            total: 100,
+            deliveryAddress: "Calle Test 123",
+            status: ORDER_STATUS.PENDING,
+            priority: ORDER_PRIORITY.LOW
+        });
+
+        const deliveryPerson = await DeliveryPerson.create({
+            user: user._id,
+            vehicle: {
+                kind: "moto",
+                plate: "ABC123"
+            }
+        });
+
+        const delivery = await Delivery.create({
+            order: order._id,
+            deliveryPerson: deliveryPerson._id
+        });
+
+        const response = await request(app)
+            .post(`/api/deliveries/${delivery._id}/receipt`);
+
+        expect(response.status).to.equal(400);
+        expect(response.body.status).to.equal("error");
+        expect(response.body.code).to.equal("FILE_REQUIRED");
+        expect(response.body.message).to.equal(
+            "El archivo es obligatorio"
+        );
+    });
+
+
+    it("debería responder 404 si el delivery no existe", async () => {
+
+        const fakeDeliveryId = new mongoose.Types.ObjectId();
+
+        const response = await request(app)
+            .post(`/api/deliveries/${fakeDeliveryId}/receipt`)
+            .attach("file", "test/fixtures/test-image.jpg");
+
+        expect(response.status).to.equal(404);
+        expect(response.body.status).to.equal("error");
+        expect(response.body.code).to.equal("DELIVERY_NOT_FOUND");
+        expect(response.body.message).to.equal(
+            "Entrega no encontrada"
+        );
+    });
+
+});
 });

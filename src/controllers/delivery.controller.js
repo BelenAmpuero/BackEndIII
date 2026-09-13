@@ -16,6 +16,9 @@ const {
     DELIVERY_STATUS
 } = require("../utils/constants");
 
+const uploadService =
+    require("../services/upload.service");
+
 
 
 const getDeliveries = async (req, res, next) => {
@@ -262,10 +265,35 @@ const updateDeliveryStatus = async (req, res, next) => {
     }
 };
 
+const createDeliveryReceipt = async (req, res, next) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const result =
+            await uploadService.createDeliveryReceipt(
+                id,
+                req.file
+            );
+
+        res.status(201).json({
+            status: "success",
+            payload: result
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+};
+
 
 module.exports = {
     getDeliveries,
     getDeliveryById,
     createDelivery,
-    updateDeliveryStatus
+    updateDeliveryStatus,
+    createDeliveryReceipt
 };

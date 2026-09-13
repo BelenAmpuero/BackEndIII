@@ -395,3 +395,65 @@ components:
             deliveries:
               type: integer
               example: 10
+    # ----------------------------------------
+    # DOCUMENT
+    # ----------------------------------------
+
+    Document:
+      type: object
+
+      properties:
+
+        _id:
+          type: string
+          description: Identificador único del documento
+          example: "64f1a2b3c4d5e6f789012349"
+
+        originalName:
+          type: string
+          description: Nombre original del archivo
+          example: "documento-identidad.jpg"
+
+        fileName:
+          type: string
+          description: Nombre generado para almacenar el archivo
+          example: "file-1789228841070-27913552.jpg"
+
+        path:
+          type: string
+          description: Ruta donde se almacena el archivo
+          example: "uploads/users/documents/file-1789228841070-27913552.jpg"
+
+        mimeType:
+          type: string
+          description: Tipo MIME del archivo
+          enum:
+            - image/jpeg
+            - image/png
+            - application/pdf
+          example: image/jpeg
+
+        size:
+          type: integer
+          description: Tamaño del archivo en bytes
+          example: 4994405
+
+        documentType:
+          type: string
+          description: Tipo de documento almacenado
+          enum:
+            - user_document
+            - driver_license
+            - delivery_proof
+          example: user_document
+
+        uploadedAt:
+          type: string
+          format: date-time
+          description: Fecha y hora de carga del documento
+          example: "2026-09-12T16:00:41.245Z"
+
+        receipt:
+          $ref: "#/components/schemas/Document"
+          nullable: true
+          description: Comprobante asociado a la entrega

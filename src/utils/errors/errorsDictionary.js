@@ -107,7 +107,44 @@ ROUTE_NOT_FOUND: {
   MOCK_DATABASE_ERROR: {
     status: 500,
     message: "Error al guardar los datos de prueba"
-  }
+  },
+
+    // Documents
+
+FILE_REQUIRED: {
+  status: 400,
+  message: "El archivo es obligatorio"
+},
+
+INVALID_FILE_TYPE: {
+  status: 400,
+  message: "El tipo de archivo no está permitido"
+},
+
+FILE_TOO_LARGE: {
+  status: 400,
+  message: "El archivo supera el tamaño máximo permitido"
+},
+
+INVALID_FILE_FIELD: {
+  status: 400,
+  message: "El campo del archivo no es válido"
+},
+
+INVALID_DOCUMENT_TYPE: {
+  status: 400,
+  message: "El tipo de documento no es válido"
+},
+
+DOCUMENT_SAVE_ERROR: {
+  status: 500,
+  message: "No se pudo guardar el documento"
+},
+
+FILE_SAVE_ERROR: {
+  status: 500,
+  message: "No se pudo guardar el archivo"
+}
 };
 
 module.exports = ERROR_CODES;
