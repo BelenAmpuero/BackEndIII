@@ -49,9 +49,12 @@ const getDeliveries = async (req, res, next) => {
         }
 
         const options = {
-            page: page ? parseInt(page, 10) : 1,
-            limit: limit ? parseInt(limit, 10) : 10
-        };
+        page: Math.max(parseInt(page, 10) || 1, 1),
+        limit: Math.min(
+        Math.max(parseInt(limit, 10) || 10, 1),
+        100
+    )
+};
 
         const result = await deliveryRepository.getAll(filter, options);
 

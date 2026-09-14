@@ -32,10 +32,17 @@ const DOCUMENT_TYPES = {
   DELIVERY_PROOF: 'delivery_proof'
 };
 
+const PAGINATION = {
+    DEFAULT_PAGE: 1,
+    DEFAULT_LIMIT: 10,
+    MAX_LIMIT: 10
+};
+
 module.exports = {
   ROLES,
   ORDER_STATUS,
   DELIVERY_STATUS,
   ORDER_PRIORITY,
-  DOCUMENT_TYPES
+  DOCUMENT_TYPES,
+  PAGINATION
 };

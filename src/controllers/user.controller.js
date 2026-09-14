@@ -26,8 +26,11 @@ const getUsers = async (req, res, next) => {
 
         // 2. Definir opciones de paginación
         const options = {
-            page: page ? parseInt(page, 10) : 1,
-            limit: limit ? parseInt(limit, 10) : 10
+        page: Math.max(parseInt(page, 10) || 1, 1),
+        limit: Math.min(
+        Math.max(parseInt(limit, 10) || 10, 1),
+        100
+        )
         };
 
         // 3. Llamar al repositorio

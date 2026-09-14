@@ -13,9 +13,7 @@ const logger =
     require("../utils/logger/logger");
 
 
-// ==========================================
 // GET ALL DELIVERY PERSONS
-// ==========================================
 
 const getDeliveryPersons = async (req, res, next) => {
 
@@ -35,9 +33,7 @@ const getDeliveryPersons = async (req, res, next) => {
         );
 
 
-        // ==========================================
         // FILTERS
-        // ==========================================
 
         const filters = {};
 
@@ -74,9 +70,7 @@ const getDeliveryPersons = async (req, res, next) => {
         }
 
 
-        // ==========================================
         // SORTING
-        // ==========================================
 
         const allowedSortFields = [
             "createdAt",
@@ -103,9 +97,7 @@ const getDeliveryPersons = async (req, res, next) => {
         };
 
 
-        // ==========================================
         // GET DATA
-        // ==========================================
 
         const result =
             await deliveryPersonRepository.getPaginated({
@@ -116,9 +108,8 @@ const getDeliveryPersons = async (req, res, next) => {
             });
 
 
-        // ==========================================
         // RESPONSE
-        // ==========================================
+
 
         res.json({
             status: "success",
@@ -133,9 +124,7 @@ const getDeliveryPersons = async (req, res, next) => {
 };
 
 
-// ==========================================
 // GET DELIVERY PERSON BY ID
-// ==========================================
 
 const getDeliveryPersonById = async (req, res, next) => {
 

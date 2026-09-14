@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const { PAGINATION } = require("../utils/constants");
 
 class UserRepository {
 

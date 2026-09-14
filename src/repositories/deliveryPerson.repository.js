@@ -1,19 +1,16 @@
 const DeliveryPerson = require("../models/deliveryPerson.model");
+const { PAGINATION } = require("../utils/constants");
 
 class DeliveryPersonRepository {
 
-    // ==========================================
     // INSERT MANY
-    // ==========================================
 
     async insertMany(deliveryPersons) {
         return await DeliveryPerson.insertMany(deliveryPersons);
     }
 
 
-    // ==========================================
     // GET PAGINATED DELIVERY PERSONS
-    // ==========================================
 
     async getPaginated({
         page = 1,
@@ -45,19 +42,14 @@ class DeliveryPersonRepository {
     }
 
 
-    // ==========================================
     // GET DELIVERY PERSON BY ID
-    // ==========================================
 
     async getById(id) {
         return await DeliveryPerson.findById(id);
     }
 
 
-    // ==========================================
     // CREATE DELIVERY PERSON
-    // ==========================================
-
     async create(deliveryPersonData) {
         return await DeliveryPerson.create(deliveryPersonData);
     }
