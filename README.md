@@ -775,33 +775,43 @@ receipt
 
 Como parte de la preparación de la API para un entorno de ejecución más estable, se incorporaron medidas básicas de control de rendimiento.
 
-## Paginación
+# Paginación
 
 Los endpoints que trabajan con grandes cantidades de registros utilizan mecanismos de paginación y límites para evitar recuperar colecciones completas de manera descontrolada.
 
 Endpoints que trabajan con paginación:
 
-* users
-* orders
-* deliveries
-* deliveryPersons
+users
+orders
+deliveries
+deliveryPersons
 
-La paginación utiliza parámetros como:
+La paginación utiliza los parámetros:
 
-```text
 page
 limit
-```
+
+El parámetro limit tiene:
+
+Valor predeterminado: 10
+Valor mínimo: 1
+Valor máximo: 100
+
+Si el cliente solicita un valor superior a 100, la API utiliza automáticamente 100 como límite máximo.
 
 Ejemplo:
 
-```http
+GET /api/users?page=1&limit=5
+
+También se aplica el mismo límite máximo a:
+
+GET /api/orders?page=1&limit=5
 GET /api/deliveryPersons?page=1&limit=5
-```
+GET /api/deliveries?page=1&limit=5
+
+De esta manera, todos los endpoints de listado mantienen un comportamiento uniforme y evitan que un cliente solicite cantidades excesivamente grandes de registros en una única consulta.
 
 También se contemplan filtros y criterios de ordenamiento en los endpoints que los soportan.
-
-Los límites evitan que un cliente solicite cantidades excesivamente grandes de registros en una única consulta.
 
 ## Consultas controladas
 
