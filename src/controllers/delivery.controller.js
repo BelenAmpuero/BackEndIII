@@ -1,62 +1,23 @@
-const mongoose = require("mongoose");
+const deliveryService =
+    require("../services/delivery.service");
 
-const deliveryRepository =
-    require("../repositories/delivery.repository");
-
-const orderRepository =
-    require("../repositories/order.repository");
-
-const deliveryPersonRepository =
-    require("../repositories/deliveryPerson.repository");
-
-const AppError = require("../utils/errors/appError");
-const logger = require("../utils/logger/logger");
-
-const {
-    DELIVERY_STATUS
-} = require("../utils/constants");
+const logger =
+    require("../utils/logger/logger");
 
 const uploadService =
     require("../services/upload.service");
 
 
+// GET ALL DELIVERIES
 
 const getDeliveries = async (req, res, next) => {
+
     try {
-        const { page, limit, status, deliveryPerson, order } = req.query;
 
-        const filter = {};
-
-        if (status) {
-            if (!Object.values(DELIVERY_STATUS).includes(status)) {
-                throw new AppError("INVALID_DELIVERY_STATUS");
-            }
-            filter.status = status;
-        }
-
-        if (deliveryPerson) {
-            if (!mongoose.Types.ObjectId.isValid(deliveryPerson)) {
-                throw new AppError("DELIVERY_PERSON_NOT_FOUND");
-            }
-            filter.deliveryPerson = deliveryPerson;
-        }
-
-        if (order) {
-            if (!mongoose.Types.ObjectId.isValid(order)) {
-                throw new AppError("INVALID_DELIVERY_DATA");
-            }
-            filter.order = order;
-        }
-
-        const options = {
-        page: Math.max(parseInt(page, 10) || 1, 1),
-        limit: Math.min(
-        Math.max(parseInt(limit, 10) || 10, 1),
-        100
-    )
-};
-
-        const result = await deliveryRepository.getAll(filter, options);
+        const result =
+            await deliveryService.getDeliveries(
+                req.query
+            );
 
         res.json({
             status: "success",
@@ -72,26 +33,23 @@ const getDeliveries = async (req, res, next) => {
         });
 
     } catch (error) {
+
         next(error);
+
     }
 };
+
+
+// GET DELIVERY BY ID
 
 const getDeliveryById = async (req, res, next) => {
 
     try {
 
-        const { id } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            throw new AppError("INVALID_DELIVERY_DATA");
-        }
-
         const delivery =
-            await deliveryRepository.getById(id);
-
-        if (!delivery) {
-            throw new AppError("DELIVERY_NOT_FOUND");
-        }
+            await deliveryService.getDeliveryById(
+                req.params.id
+            );
 
         res.json({
             status: "success",
@@ -106,87 +64,20 @@ const getDeliveryById = async (req, res, next) => {
 };
 
 
+// CREATE DELIVERY
+
 const createDelivery = async (req, res, next) => {
 
     try {
 
-        const {
-            order,
-            deliveryPerson,
-            status
-        } = req.body;
-
-
-        if (!order || !deliveryPerson) {
-            logger.warning("Falta order o deliveryPerson");
-
-
-            throw new AppError("DELIVERY_ASSIGNMENT_FAILED");
-        }
-
-        if (
-            !mongoose.Types.ObjectId.isValid(order) ||
-            !mongoose.Types.ObjectId.isValid(deliveryPerson)
-        ) {
-
-            throw new AppError("DELIVERY_ASSIGNMENT_FAILED");
-        }
-
-
-        // Verificar pedido
-
-        const existingOrder =
-            await orderRepository.getById(order);
-
-        if (!existingOrder) {
-
-            throw new AppError("DELIVERY_ASSIGNMENT_FAILED");
-        }
-
-
-        // Verificar repartidor
-
-        const existingDeliveryPerson =
-            await deliveryPersonRepository.getById(
-                deliveryPerson
-            );
-
-        if (!existingDeliveryPerson) {
-
-            throw new AppError("DELIVERY_PERSON_NOT_FOUND");
-        }
-
-        // Verificar disponibilidad
-
-        if (!existingDeliveryPerson.isAvailable) {
-
-            throw new AppError("DELIVERY_PERSON_NOT_AVAILABLE");
-        }
-
-
-        // Validar estado
-
-        if (
-            status !== undefined &&
-            !Object.values(DELIVERY_STATUS).includes(status)
-        ) {
-
-            throw new AppError("INVALID_DELIVERY_STATUS");
-        }
-
-
         const delivery =
-            await deliveryRepository.create({
-                order,
-                deliveryPerson,
-                status
-            });
-
+            await deliveryService.createDelivery(
+                req.body
+            );
 
         logger.info(
             `Entrega creada correctamente: ${delivery._id}`
         );
-
 
         res.status(201).json({
             status: "success",
@@ -201,60 +92,21 @@ const createDelivery = async (req, res, next) => {
 };
 
 
+// UPDATE DELIVERY STATUS
+
 const updateDeliveryStatus = async (req, res, next) => {
 
     try {
 
-        const { id } = req.params;
-        const { status } = req.body;
-
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            throw new AppError("INVALID_DELIVERY_STATUS");
-        }
-
-
-        if (!Object.values(DELIVERY_STATUS).includes(status)) {
-            throw new AppError("INVALID_DELIVERY_STATUS");
-        }
-
-
-        const delivery =
-            await deliveryRepository.getById(id);
-
-        if (!delivery) {
-            throw new AppError("DELIVERY_NOT_FOUND");
-        }
-
-
-        if (
-            delivery.status === DELIVERY_STATUS.COMPLETED
-        ) {
-            throw new AppError("DELIVERY_ALREADY_COMPLETED");
-        }
-
-
-        const updateData = {
-            status
-        };
-
-
-        if (status === DELIVERY_STATUS.COMPLETED) {
-            updateData.deliveredAt = new Date();
-        }
-
-
         const updatedDelivery =
-            await deliveryRepository.update(
-                id,
-                updateData
+            await deliveryService.updateDeliveryStatus(
+                req.params.id,
+                req.body.status
             );
 
-
         logger.info(
-            `Estado de entrega actualizado: ${id} → ${status}`
+            `Estado de entrega actualizado: ${req.params.id} → ${req.body.status}`
         );
-
 
         res.json({
             status: "success",
@@ -268,15 +120,16 @@ const updateDeliveryStatus = async (req, res, next) => {
     }
 };
 
+
+// CREATE DELIVERY RECEIPT
+
 const createDeliveryReceipt = async (req, res, next) => {
 
     try {
 
-        const { id } = req.params;
-
         const result =
             await uploadService.createDeliveryReceipt(
-                id,
+                req.params.id,
                 req.file
             );
 

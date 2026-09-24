@@ -13,11 +13,11 @@ class DeliveryPersonRepository {
     // GET PAGINATED DELIVERY PERSONS
 
     async getPaginated({
-        page = 1,
-        limit = 10,
-        filters = {},
-        sort = {}
-    }) {
+    page = PAGINATION.DEFAULT_PAGE,
+    limit = PAGINATION.DEFAULT_LIMIT,
+    filters = {},
+    sort = {}
+})  {
 
         const skip = (page - 1) * limit;
 
@@ -44,11 +44,18 @@ class DeliveryPersonRepository {
 
     // GET DELIVERY PERSON BY ID
 
-    async getById(id) {
-        return await DeliveryPerson.findById(id);
-    }
+    // async getById(id) {
+    //     return await DeliveryPerson.findById(id);
+    // }
+async getById(id) {
 
 
+    const result =
+        await DeliveryPerson.findById(id);
+
+
+    return result;
+}
     // CREATE DELIVERY PERSON
     async create(deliveryPersonData) {
         return await DeliveryPerson.create(deliveryPersonData);

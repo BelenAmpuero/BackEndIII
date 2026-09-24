@@ -3,7 +3,11 @@ const {
     generateOrders,
     generateSeedData
 } = require("../services/mock.service.js");
-const logger = require("../utils/logger/logger");
+
+const logger =
+    require("../utils/logger/logger");
+
+
 const getMockingUsers = (req, res, next) => {
 
     try {
@@ -12,11 +16,16 @@ const getMockingUsers = (req, res, next) => {
             ? 1
             : Number(req.query.qty);
 
-        logger.info(`Generando ${qty} usuarios mock`);
+        logger.info(
+            `Generando ${qty} usuarios mock`
+        );
 
-        const users = generateUsers(qty);
+        const users =
+            generateUsers(qty);
 
-        logger.info(`Usuarios mock generados correctamente: ${users.length}`);
+        logger.info(
+            `Usuarios mock generados correctamente: ${users.length}`
+        );
 
         res.json({
             status: "success",
@@ -24,47 +33,69 @@ const getMockingUsers = (req, res, next) => {
         });
 
     } catch (error) {
+
         next(error);
+
     }
 };
 
-    const getMockingOrders = (req, res, next ) => {
 
-        try {
-    const qty = req.query.qty === undefined
-    ? 5
-    : Number (req.query.qty);
+const getMockingOrders = (req, res, next) => {
 
-    logger.info(`Generando ${qty} pedidos mock`);
+    try {
 
-    const users = generateUsers(qty);
+        const qty = req.query.qty === undefined
+            ? 5
+            : Number(req.query.qty);
 
-    const userIds = users.map(user => user._id);
+        logger.info(
+            `Generando ${qty} pedidos mock`
+        );
 
-    const orders = generateOrders(userIds);
+        const users =
+            generateUsers(qty);
 
-    res.json({
-        status: "success",
-        payload: orders
-    });
-} catch (error) {
-next(error);
-}
+        const userIds =
+            users.map(user => user._id);
+
+        const orders =
+            generateOrders(userIds);
+
+        logger.info(
+            `Pedidos mock generados correctamente: ${orders.length}`
+        );
+
+        res.json({
+            status: "success",
+            payload: orders
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
 };
+
 
 const generateData = async (req, res, next) => {
 
     try {
 
         const qty = req.query.qty === undefined
-        ? 10
-        : Number (req.query.qty);
+            ? 10
+            : Number(req.query.qty);
 
-        logger.info(`Generando datos de prueba. Cantidad: ${qty}`);
+        logger.info(
+            `Generando datos de prueba. Cantidad: ${qty}`
+        );
 
-        const result = await generateSeedData(qty);
+        const result =
+            await generateSeedData(qty);
 
-        logger.info("Datos de prueba generados correctamente");
+        logger.info(
+            "Datos de prueba generados correctamente"
+        );
 
         res.status(201).json({
             status: "success",
@@ -74,11 +105,11 @@ const generateData = async (req, res, next) => {
 
     } catch (error) {
 
-        next (error);
+        next(error);
 
     }
-
 };
+
 
 module.exports = {
     getMockingUsers,

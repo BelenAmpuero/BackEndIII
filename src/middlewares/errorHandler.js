@@ -3,7 +3,12 @@ const logger = require('../utils/logger/logger');
 
 const errorHandler = (err, req, res, next) => {
 
+    if (res.headersSent) {
+        return next(err);
+    }
+
     if (err instanceof AppError) {
+
         const logData = {
             code: err.code,
             status: err.status,
@@ -12,11 +17,17 @@ const errorHandler = (err, req, res, next) => {
         };
 
         if (err.status >= 500) {
-            logger.error(`Error del servidor: ${err.message}`, logData);
+            logger.error(
+                `Error del servidor: ${err.message}`,
+                logData
+            );
         } else {
-            logger.warning(`Error de aplicación: ${err.message}`, logData);
+            logger.warning(
+                `Error de aplicación: ${err.message}`,
+                logData
+            );
         }
-        
+
         return res.status(err.status).json({
             status: "error",
             code: err.code,
@@ -24,16 +35,28 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
-    logger.error(`Error inesperado: ${err.message}`, {
-        method: req.method,
-        path: req.originalUrl,
-        stack: err.stack
-    });
+    logger.error(
+        `Error inesperado: ${err.message}`,
+        {
+            method: req.method,
+            path: req.originalUrl,
+            stack: err.stack
+        }
+    );
 
-    logger.fatal(`Error interno del servidor: ${err.message}`, {
-        method: req.method,
-        path: req.originalUrl,
-        stack: err.stack
+    logger.fatal(
+        `Error interno del servidor: ${err.message}`,
+        {
+            method: req.method,
+            path: req.originalUrl,
+            stack: err.stack
+        }
+    );
+
+    return res.status(500).json({
+        status: "error",
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error interno del servidor"
     });
 };
 

@@ -67,6 +67,7 @@ const validateDeliveryPersons = (deliveryPersons) => {
     );
   };
 
+
   const generateSeedData = async (qty = 10) => {
 
   logger.info(`Inicio de la generación de datos: ${qty}`);

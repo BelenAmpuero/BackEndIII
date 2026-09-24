@@ -4,3 +4,7 @@ logs/
 .env.test
 uploads/*
 !uploads/.gitkeep
+
+*.zip
+*.rar
+*.7z
