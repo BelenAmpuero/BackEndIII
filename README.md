@@ -1,12 +1,15 @@
 # ShipNow - API REST con Node.js, Express y MongoDB
 
-API desarrollada con **Node.js, Express y MongoDB** para la gestión de usuarios, órdenes, repartidores y entregas.
+API REST desarrollada con **Node.js, Express y MongoDB** para la gestión de usuarios, órdenes, repartidores y entregas.
 
-El proyecto implementa una **arquitectura por capas** y cuenta con generación de datos simulados, manejo profesional de errores, logging centralizado, documentación Swagger/OpenAPI, testing funcional, configuración por entornos, carga de archivos mediante Multer y containerización mediante Docker.
+El proyecto implementa una **arquitectura por capas**, persistencia mediante MongoDB y Mongoose, generación de datos simulados, manejo centralizado de errores, logging con Winston, documentación Swagger/OpenAPI, testing funcional, configuración por entornos, carga de archivos mediante Multer y ejecución mediante Docker y Docker Compose.
 
-## Características principales
+---
+
+# Características principales
 
 * Arquitectura por capas.
+* Separación de responsabilidades mediante **Controllers, Services y Repositories**.
 * Persistencia mediante MongoDB y Mongoose.
 * Generación de datos simulados utilizando Faker.
 * Manejo centralizado de errores mediante `AppError`.
@@ -20,16 +23,18 @@ El proyecto implementa una **arquitectura por capas** y cuenta con generación d
 * Tests funcionales con Mocha, Chai y Supertest.
 * Entorno de testing separado del entorno de desarrollo.
 * Endpoint de health check.
-* Paginación y límites en endpoints de consulta de grandes volúmenes.
+* Paginación, filtros y límites máximos en endpoints de consulta.
 * Configuración mediante variables de entorno.
 * Validación de variables críticas al iniciar la aplicación.
-* **Carga de archivos mediante Multer.**
-* **Carga de documentos asociados a usuarios.**
-* **Carga de comprobantes asociados a entregas.**
-* **Validación de tipo, campo y tamaño de archivos.**
-* **Almacenamiento organizado de archivos en carpetas del servidor.**
-* **Persistencia de metadatos de archivos en MongoDB.**
+* Carga de archivos mediante Multer.
+* Carga de documentos asociados a usuarios.
+* Carga de comprobantes asociados a entregas.
+* Validación de tipo, campo y tamaño de archivos.
+* Almacenamiento organizado de archivos.
+* Persistencia de metadatos de archivos en MongoDB.
 * Containerización mediante Docker.
+* Orquestación de API y MongoDB mediante Docker Compose.
+* Healthcheck de MongoDB para controlar el inicio de la API.
 
 ---
 
@@ -44,13 +49,14 @@ El proyecto implementa una **arquitectura por capas** y cuenta con generación d
 * dotenv
 * Winston
 * winston-daily-rotate-file
-* **Multer**
+* Multer
 * swagger-jsdoc
 * swagger-ui-express
 * Mocha
 * Chai
 * Supertest
 * Docker
+* Docker Compose
 
 ---
 
@@ -78,19 +84,14 @@ npm install
 
 # Variables de entorno
 
-La aplicación utiliza variables de entorno para evitar almacenar configuraciones y credenciales sensibles directamente en el código fuente.
+La aplicación utiliza variables de entorno para evitar almacenar configuraciones y credenciales directamente en el código fuente.
 
 Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
 PORT=8080
-
 MONGODB_URI=tu_url_de_mongodb
-
-SESSION_SECRET=tu_secret
-
 NODE_ENV=development
-
 LOG_LEVEL=debug
 ```
 
@@ -98,11 +99,14 @@ LOG_LEVEL=debug
 
 * `PORT`: puerto en el que se ejecuta el servidor.
 * `MONGODB_URI`: cadena de conexión utilizada para conectarse a MongoDB.
-* `SESSION_SECRET`: secreto utilizado por los mecanismos de sesión cuando corresponde.
 * `NODE_ENV`: define el entorno de ejecución. Puede ser `development`, `test` o `production`.
 * `LOG_LEVEL`: define el nivel mínimo de logging.
 
-## Entorno de testing
+Los archivos `.env` y `.env.test` se encuentran excluidos del repositorio mediante `.gitignore`.
+
+---
+
+# Entorno de testing
 
 El proyecto utiliza un archivo `.env.test` separado para ejecutar las pruebas.
 
@@ -110,43 +114,31 @@ Ejemplo:
 
 ```env
 PORT=8080
-
 MONGODB_URI=tu_url_de_mongodb_de_test
-
 NODE_ENV=test
-
 LOG_LEVEL=error
 ```
 
+Cuando `NODE_ENV=test`, la aplicación carga automáticamente `.env.test`.
+
 El entorno de testing utiliza una base de datos independiente para evitar afectar los datos utilizados durante el desarrollo.
 
-La aplicación carga `.env.test` automáticamente cuando:
+---
 
-```env
-NODE_ENV=test
-```
+# Producción
 
-## Producción
-
-No es necesario almacenar un `.env.production` dentro del repositorio.
-
-En un entorno productivo, las variables deben ser proporcionadas externamente por el servidor, plataforma de despliegue o contenedor.
+En un entorno productivo, las variables de entorno deben ser proporcionadas externamente por el servidor, plataforma de despliegue o contenedor.
 
 Ejemplo:
 
 ```env
 PORT=8080
-
 MONGODB_URI=tu_url_de_mongodb
-
 NODE_ENV=production
-
 LOG_LEVEL=info
 ```
 
-De esta manera, las credenciales y configuraciones sensibles no forman parte del código fuente.
-
-> Los archivos `.env` y `.env.test` contienen información sensible y no deben subirse al repositorio.
+No se deben almacenar credenciales ni configuraciones sensibles directamente en el código fuente.
 
 ---
 
@@ -174,7 +166,7 @@ http://localhost:8080
 
 # Health Check
 
-La API cuenta con un endpoint de health check para comprobar rápidamente que la aplicación se encuentra funcionando:
+La API cuenta con un endpoint de health check:
 
 ```http
 GET /api/health
@@ -191,62 +183,57 @@ Ejemplo de respuesta:
 }
 ```
 
-El endpoint informa:
+El endpoint permite comprobar:
 
 * Estado de la aplicación.
 * Entorno de ejecución.
 * Tiempo de actividad del proceso.
 * Timestamp de la consulta.
 
-No expone información sensible ni credenciales.
+No expone credenciales ni información sensible.
 
 ---
 
 # Documentación Swagger
 
-El proyecto cuenta con documentación interactiva de la API utilizando **Swagger UI y OpenAPI 3.0**.
+La API cuenta con documentación interactiva mediante **Swagger UI y OpenAPI 3.0**.
 
-La documentación está disponible en:
+Con la aplicación ejecutándose, acceder a:
 
 ```text
 http://localhost:8080/api/docs
 ```
 
-Desde Swagger UI es posible consultar y probar los endpoints documentados directamente desde el navegador utilizando **Try it out**.
-
-La especificación OpenAPI también puede consultarse en formato JSON mediante:
+La especificación OpenAPI también está disponible en:
 
 ```text
 http://localhost:8080/api/docs-json
 ```
 
+Desde Swagger UI es posible consultar y probar los endpoints mediante **Try it out**.
+
 ## Módulos documentados
 
-Actualmente la documentación incluye:
+* Mocks
+* Logger
+* Users
+* Orders
+* Delivery Persons
+* Deliveries
+* Uploads
 
-* **Mocks**
-* **Logger**
-* **Users**
-* **Orders**
-* **Delivery Persons**
-* **Deliveries**
-* **Carga de archivos**
-
-Los endpoints de carga utilizan documentación `multipart/form-data` e indican:
+Los endpoints de carga utilizan `multipart/form-data` y documentan:
 
 * Campo esperado para el archivo.
-* Campos adicionales.
-* Tipos de documento permitidos.
+* Tipos de documento.
+* Tipos MIME permitidos.
 * Respuestas exitosas.
 * Posibles errores.
 
-Los schemas reutilizables se encuentran separados de la documentación de los endpoints.
-
-La estructura de documentación es:
+La documentación OpenAPI se organiza mediante archivos separados:
 
 ```text
 src/
-
 ├── config/
 │   └── docs/
 │       └── swagger.config.js
@@ -262,31 +249,21 @@ src/
     └── uploads.yaml
 ```
 
-Los schemas incluyen las entidades utilizadas por la aplicación:
-
-* User
-* Order
-* OrderItem
-* DeliveryPerson
-* Delivery
-* Document
-* ErrorResponse
-* SuccessResponse
-* Respuestas relacionadas con Mocking
-
 ---
 
 # Carga de archivos
 
 El proyecto incorpora un sistema centralizado de carga de archivos utilizando **Multer**.
 
-La funcionalidad permite recibir archivos mediante `multipart/form-data`, validarlos, almacenarlos en carpetas organizadas del servidor y registrar únicamente sus metadatos en MongoDB.
+La funcionalidad permite recibir archivos mediante `multipart/form-data`, validarlos, almacenarlos en carpetas organizadas y registrar sus metadatos en MongoDB.
 
-Los archivos cargados **no se almacenan dentro de MongoDB**.
+Los archivos físicos **no se almacenan dentro de MongoDB**.
+
+MongoDB conserva únicamente la información descriptiva y las referencias correspondientes.
 
 ## Configuración de Multer
 
-La configuración de Multer se encuentra centralizada fuera de los routers:
+La configuración se encuentra centralizada en:
 
 ```text
 src/
@@ -294,28 +271,25 @@ src/
     └── multer.config.js
 ```
 
-La configuración centralizada define:
+La configuración define:
 
 * Carpetas de destino.
-* Generación de nombres de archivos.
+* Generación de nombres de archivo.
 * Tipos MIME permitidos.
 * Límite de tamaño.
-* Configuración específica para documentos de usuarios.
-* Configuración específica para comprobantes de entregas.
+* Configuración para documentos de usuarios.
+* Configuración para comprobantes de entregas.
 
-Los routers solamente utilizan los middlewares de carga ya configurados.
-
-Esto permite mantener separada la configuración de almacenamiento de la definición de las rutas.
+Los routers utilizan los middlewares de carga configurados y no contienen directamente la configuración de almacenamiento.
 
 ---
 
 # Estructura de uploads
 
-Los archivos cargados se organizan en carpetas según su finalidad:
+Los archivos se organizan según su finalidad:
 
 ```text
 uploads/
-
 ├── users/
 │   └── documents/
 │
@@ -323,31 +297,27 @@ uploads/
     └── receipts/
 ```
 
-### Documentos de usuarios
-
-Los documentos asociados a usuarios se almacenan en:
+## Documentos de usuarios
 
 ```text
 uploads/users/documents/
 ```
 
-### Comprobantes de entregas
-
-Los comprobantes asociados a entregas se almacenan en:
+## Comprobantes de entregas
 
 ```text
 uploads/deliveries/receipts/
 ```
 
-La carpeta `uploads/` está incluida en `.gitignore`.
+La carpeta `uploads/` está excluida del repositorio mediante `.gitignore`.
 
-Los archivos cargados durante la ejecución de la aplicación no forman parte del repositorio.
+Los archivos generados durante la ejecución no forman parte del código fuente.
 
 ---
 
 # Tipos de archivos permitidos
 
-La configuración de Multer permite los siguientes tipos MIME:
+Multer permite los siguientes tipos MIME:
 
 ```text
 image/jpeg
@@ -355,13 +325,15 @@ image/png
 application/pdf
 ```
 
-Los archivos que no correspondan a los tipos permitidos son rechazados mediante el sistema centralizado de errores.
+El tamaño máximo permitido es de **5 MB**.
+
+Los archivos que no cumplen las validaciones son rechazados mediante el sistema centralizado de errores.
 
 ---
 
 # Metadatos de archivos
 
-El archivo físico se almacena en el servidor, mientras que MongoDB conserva únicamente sus metadatos.
+El archivo físico se almacena en el servidor, mientras que MongoDB conserva sus metadatos.
 
 Entre los datos registrados se encuentran:
 
@@ -373,27 +345,17 @@ Entre los datos registrados se encuentran:
 * Tipo de documento.
 * Fecha de carga.
 
-El modelo `Document` permite centralizar esta información y asociarla con las entidades correspondientes.
-
-De esta manera, MongoDB **no almacena el contenido binario del archivo**.
+El modelo `Document` centraliza esta información y permite asociarla con las entidades correspondientes.
 
 ---
 
 # Documentos de usuarios
 
-El sistema permite asociar documentos a usuarios existentes.
-
-## Endpoint
+Los documentos pueden asociarse a usuarios existentes mediante:
 
 ```http
 POST /api/users/:id/documents
 ```
-
-El endpoint recibe:
-
-* ID del usuario.
-* Archivo.
-* Tipo de documento.
 
 La petición utiliza:
 
@@ -401,47 +363,23 @@ La petición utiliza:
 multipart/form-data
 ```
 
-El campo del archivo esperado es:
+Campos:
 
 ```text
-file
+file: archivo
+documentType: tipo de documento
 ```
 
-El tipo de documento se envía mediante:
-
-```text
-documentType
-```
-
-## Tipos de documento
-
-Los documentos de usuario aceptados incluyen:
+Tipos de documento admitidos:
 
 ```text
 user_document
 driver_license
 ```
 
-El tipo `delivery_proof` se utiliza para comprobantes de entrega.
+Antes de almacenar el documento se verifica que el usuario exista.
 
-## Ejemplo conceptual de petición
-
-```text
-POST /api/users/:id/documents
-
-Content-Type: multipart/form-data
-```
-
-Campos:
-
-```text
-file: archivo.jpg
-documentType: user_document
-```
-
-Antes de almacenar el documento, el sistema verifica que el usuario exista.
-
-Si la operación es correcta:
+Flujo de procesamiento:
 
 1. Multer recibe el archivo.
 2. Se valida el archivo.
@@ -449,16 +387,14 @@ Si la operación es correcta:
 4. Se valida el tipo de documento.
 5. Se crea el documento con sus metadatos.
 6. Se asocia el documento al usuario.
-7. Se guarda la información actualizada.
+7. Se actualiza la información correspondiente.
 8. Se registra el evento mediante Winston.
 
 ---
 
 # Comprobantes de entregas
 
-El sistema también permite cargar comprobantes asociados a una entrega existente.
-
-## Endpoint
+Los comprobantes se cargan mediante:
 
 ```http
 POST /api/deliveries/:id/receipt
@@ -470,21 +406,21 @@ La petición utiliza:
 multipart/form-data
 ```
 
-El campo del archivo esperado es:
+Campo:
 
 ```text
 file
 ```
 
-A diferencia de los documentos de usuario, el tipo de documento no necesita enviarse desde el cliente, ya que el endpoint determina automáticamente que se trata de un:
+El endpoint determina automáticamente que el documento corresponde al tipo:
 
 ```text
 delivery_proof
 ```
 
-Antes de almacenar el comprobante, el sistema verifica que la entrega exista.
+Antes de almacenar el comprobante se verifica que la entrega exista.
 
-Si la operación es correcta:
+Flujo:
 
 1. Multer recibe el archivo.
 2. Se valida el archivo.
@@ -494,7 +430,7 @@ Si la operación es correcta:
 6. Se actualiza la entrega.
 7. Se registra el evento mediante Winston.
 
-La entrega mantiene la referencia al documento mediante el campo:
+La entrega mantiene la referencia al documento mediante:
 
 ```text
 receipt
@@ -504,42 +440,41 @@ receipt
 
 # Validaciones de archivos
 
-El sistema incorpora validaciones específicas para las cargas de archivos.
-
-Entre ellas:
+El sistema contempla validaciones para:
 
 * Archivo obligatorio.
 * Tipo de archivo permitido.
-* Tamaño máximo configurado.
+* Tamaño máximo.
 * Campo de archivo esperado.
 * Tipo de documento válido.
 * Existencia de la entidad asociada.
-* Errores durante el almacenamiento de metadatos.
-
-Estas validaciones se integran con el sistema centralizado de errores de ShipNow.
+* Errores durante el almacenamiento.
+* Errores durante el guardado de metadatos.
 
 ---
 
 # Errores de carga de archivos
 
-Los errores relacionados con archivos utilizan el mismo formato general que el resto de la API.
+Los errores de archivos utilizan el mismo formato general que el resto de la API.
 
 Principales códigos:
 
-## Documentos y archivos
+```text
+FILE_REQUIRED           - 400
+INVALID_FILE_TYPE       - 400
+FILE_TOO_LARGE          - 400
+INVALID_FILE_FIELD      - 400
+INVALID_DOCUMENT_TYPE   - 400
+DOCUMENT_SAVE_ERROR     - 500
+FILE_SAVE_ERROR         - 500
+```
 
-* `FILE_REQUIRED` - 400
-* `INVALID_FILE_TYPE` - 400
-* `FILE_TOO_LARGE` - 400
-* `INVALID_FILE_FIELD` - 400
-* `INVALID_DOCUMENT_TYPE` - 400
-* `DOCUMENT_SAVE_ERROR` - 500
-* `FILE_SAVE_ERROR` - 500
+Errores relacionados con las entidades:
 
-## Entidades asociadas
-
-* `USER_NOT_FOUND` - 404
-* `DELIVERY_NOT_FOUND` - 404
+```text
+USER_NOT_FOUND          - 404
+DELIVERY_NOT_FOUND      - 404
+```
 
 Ejemplo:
 
@@ -551,13 +486,11 @@ Ejemplo:
 }
 ```
 
-Esto mantiene la misma estructura de respuesta utilizada por el resto de los módulos de la API.
-
 ---
 
 # Manejo de errores de Multer
 
-Los errores producidos durante la carga de archivos son procesados mediante un middleware específico:
+Los errores producidos durante el procesamiento de archivos son gestionados mediante:
 
 ```text
 src/
@@ -565,257 +498,101 @@ src/
     └── uploadError.middleware.js
 ```
 
-Este middleware permite traducir los errores generados durante el procesamiento de `multipart/form-data` al formato de errores utilizado por ShipNow.
+Este middleware traduce los errores producidos durante `multipart/form-data` al formato de errores utilizado por ShipNow.
 
 De esta manera, errores como:
 
-* archivo demasiado grande,
-* campo de archivo inesperado,
-* tipo de archivo no permitido,
+* Archivo demasiado grande.
+* Campo inesperado.
+* Tipo de archivo no permitido.
 
-no quedan expuestos como errores internos de Multer, sino que se integran al sistema centralizado de errores.
+se integran al sistema centralizado de errores.
 
 ---
 
-# Endpoints de Users
+# Endpoints principales
 
-El módulo de Users permite gestionar los usuarios registrados en la aplicación.
-
-Los usuarios cuentan con información personal y un rol que determina su tipo dentro del sistema.
-
-Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Users**.
+## Users
 
 ```http
 GET /api/users
-
 GET /api/users/:id
-
 POST /api/users
-```
-
-Además, el módulo incorpora la carga de documentos:
-
-```http
 POST /api/users/:id/documents
 ```
 
-Los endpoints realizan las validaciones correspondientes y utilizan el sistema centralizado de manejo de errores.
+Los endpoints de listado utilizan paginación y límites para controlar la cantidad de registros recuperados.
 
-Los endpoints de listado cuentan con mecanismos de consulta controlada para evitar recuperar cantidades ilimitadas de registros.
-
----
-
-# Endpoints de Orders
-
-El módulo de Orders permite gestionar pedidos asociados a usuarios existentes.
-
-Cada pedido contiene:
-
-* Usuario asociado.
-* Items.
-* Cantidad.
-* Precio.
-* Total.
-* Dirección de entrega.
-* Estado.
-* Prioridad.
-
-## Obtener todos los pedidos
+## Orders
 
 ```http
 GET /api/orders
-```
-
-Obtiene los pedidos registrados en MongoDB utilizando mecanismos de consulta controlada.
-
-## Obtener un pedido por ID
-
-```http
 GET /api/orders/:id
-```
-
-Obtiene un pedido específico utilizando su identificador único.
-
-El endpoint valida que el ID tenga un formato válido y devuelve un error si el pedido no existe.
-
-## Crear un pedido
-
-```http
 POST /api/orders
-```
-
-Crea un nuevo pedido asociado a un usuario existente.
-
-El servidor valida:
-
-* Que el usuario exista.
-* Que el ID del usuario sea válido.
-* Que exista al menos un item.
-* Que la cantidad de cada item sea un número entero mayor o igual a 1.
-* Que el precio sea un número mayor o igual a 0.
-* Que el estado sea válido.
-* Que la prioridad sea válida.
-
-El total se calcula automáticamente a partir de la cantidad y el precio de cada producto.
-
-Ejemplo:
-
-```json
-{
-  "user": "64f1a2b3c4d5e6f789012345",
-  "items": [
-    {
-      "product": "Hamburguesa clásica",
-      "quantity": 2,
-      "price": 4500
-    },
-    {
-      "product": "Papas fritas",
-      "quantity": 1,
-      "price": 2000
-    }
-  ],
-  "deliveryAddress": "Av. Colón 1234, Córdoba",
-  "status": "pending",
-  "priority": "low"
-}
-```
-
-El total se calcula automáticamente:
-
-```text
-2 × 4500 + 1 × 2000 = 11000
-```
-
-## Actualizar el estado de un pedido
-
-```http
 PATCH /api/orders/:id/status
 ```
 
-Permite actualizar el estado de un pedido existente.
+## Delivery Persons
 
-Body:
-
-```json
-{
-  "status": "accepted"
-}
-```
-
-Estados disponibles:
+Los endpoints se encuentran documentados en Swagger bajo la sección:
 
 ```text
-pending
-accepted
-preparing
-on_the_way
-delivered
-cancelled
+Delivery Persons
 ```
 
-Un pedido que ya se encuentra en estado `cancelled` no puede volver a modificarse.
+## Deliveries
 
----
+Los endpoints se encuentran documentados en Swagger bajo la sección:
 
-# Endpoints de Delivery Persons
+```text
+Deliveries
+```
 
-El módulo de Delivery Persons permite gestionar los repartidores utilizados por el sistema.
-
-Los repartidores se encuentran asociados a usuarios y cuentan con información sobre el vehículo utilizado.
-
-Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Delivery Persons**.
-
-Las operaciones, filtros, paginación y validaciones correspondientes pueden consultarse directamente desde Swagger UI.
-
----
-
-# Endpoints de Deliveries
-
-El módulo de Deliveries permite gestionar las entregas asociadas a pedidos y repartidores.
-
-Las entregas relacionan:
-
-* Un pedido.
-* Un repartidor.
-* Un estado de entrega.
-* Opcionalmente, un comprobante asociado.
-
-Los endpoints disponibles se encuentran documentados en Swagger bajo la sección **Deliveries**.
-
-## Cargar comprobante de entrega
+Incluye la carga de comprobantes:
 
 ```http
 POST /api/deliveries/:id/receipt
 ```
 
-Recibe un archivo mediante `multipart/form-data` utilizando el campo:
-
-```text
-file
-```
-
-El comprobante se almacena en:
-
-```text
-uploads/deliveries/receipts/
-```
-
-y sus metadatos se registran en MongoDB.
-
-La entrega queda asociada al documento mediante el campo:
-
-```text
-receipt
-```
-
 ---
 
-# Performance y escalabilidad
+# Paginación y límites
 
-Como parte de la preparación de la API para un entorno de ejecución más estable, se incorporaron medidas básicas de control de rendimiento.
+Los endpoints que trabajan con grandes cantidades de registros utilizan paginación:
 
-# Paginación
+```text
+GET /api/users
+GET /api/orders
+GET /api/deliveryPersons
+GET /api/deliveries
+```
 
-Los endpoints que trabajan con grandes cantidades de registros utilizan mecanismos de paginación y límites para evitar recuperar colecciones completas de manera descontrolada.
+Parámetros:
 
-Endpoints que trabajan con paginación:
-
-users
-orders
-deliveries
-deliveryPersons
-
-La paginación utiliza los parámetros:
-
+```text
 page
 limit
+```
 
-El parámetro limit tiene:
+Configuración:
 
+```text
 Valor predeterminado: 10
 Valor mínimo: 1
 Valor máximo: 100
-
-Si el cliente solicita un valor superior a 100, la API utiliza automáticamente 100 como límite máximo.
+```
 
 Ejemplo:
 
+```http
 GET /api/users?page=1&limit=5
+```
 
-También se aplica el mismo límite máximo a:
+El mismo límite máximo se aplica a los demás endpoints paginados.
 
-GET /api/orders?page=1&limit=5
-GET /api/deliveryPersons?page=1&limit=5
-GET /api/deliveries?page=1&limit=5
+Si el cliente solicita un `limit` superior a `100`, se utiliza automáticamente el máximo permitido.
 
-De esta manera, todos los endpoints de listado mantienen un comportamiento uniforme y evitan que un cliente solicite cantidades excesivamente grandes de registros en una única consulta.
-
-También se contemplan filtros y criterios de ordenamiento en los endpoints que los soportan.
-
-## Consultas controladas
-
-Las consultas a MongoDB utilizan mecanismos como:
+Las consultas utilizan mecanismos como:
 
 * `skip()`
 * `limit()`
@@ -823,28 +600,20 @@ Las consultas a MongoDB utilizan mecanismos como:
 * filtros
 * ordenamiento controlado
 
-Esto permite reducir el volumen de información transferida y procesada en cada solicitud.
-
-## Logging
-
-Se evita utilizar logging excesivo en operaciones normales.
-
-Los registros de aplicación se gestionan mediante Winston y el nivel puede modificarse según el entorno utilizando `LOG_LEVEL`.
+Esto permite limitar el volumen de información procesada y transferida en cada solicitud.
 
 ---
 
 # Manejo profesional de errores
 
-El proyecto cuenta con un sistema centralizado de manejo de errores que utiliza:
+El proyecto utiliza un sistema centralizado compuesto por:
 
 * `AppError`.
-* Un diccionario de códigos de error.
+* Diccionario de códigos de error.
 * Middleware global `errorHandler`.
-* Middleware específico para errores de carga de archivos.
+* Middleware específico para errores de carga.
 
-Los errores controlados son procesados por los middlewares y devueltos al cliente utilizando una estructura JSON consistente.
-
-## Estructura de respuesta de error
+Los errores controlados utilizan una estructura JSON consistente:
 
 ```json
 {
@@ -854,61 +623,7 @@ Los errores controlados son procesados por los middlewares y devueltos al client
 }
 ```
 
-Los campos representan:
-
-* `status`: indica que la operación terminó con un error.
-* `code`: identifica el tipo de error definido en el diccionario de errores.
-* `message`: describe el motivo del error.
-
-Los errores controlados utilizan el código HTTP correspondiente definido en el diccionario de errores.
-
----
-
-# Principales códigos de error
-
-## Users
-
-* `USER_NOT_FOUND` - 404
-* `USER_ALREADY_EXISTS` - 409
-* `INVALID_USER_DATA` - 400
-
-## Orders
-
-* `ORDER_NOT_FOUND` - 404
-* `INVALID_ORDER_DATA` - 400
-* `INVALID_ORDER_STATUS` - 400
-* `ORDER_ALREADY_CANCELLED` - 409
-* `ORDER_CANNOT_BE_CANCELLED` - 400
-
-## Delivery Person
-
-* `DELIVERY_PERSON_NOT_FOUND` - 404
-* `DELIVERY_PERSON_NOT_AVAILABLE` - 409
-* `DELIVERY_PERSON_ALREADY_ASSIGNED` - 409
-* `INVALID_DELIVERY_PERSON` - 400
-
-## Delivery
-
-* `DELIVERY_NOT_FOUND` - 404
-* `DELIVERY_ALREADY_COMPLETED` - 409
-* `INVALID_DELIVERY_STATUS` - 400
-* `DELIVERY_ASSIGNMENT_FAILED` - 400
-
-## Documents y archivos
-
-* `FILE_REQUIRED` - 400
-* `INVALID_FILE_TYPE` - 400
-* `FILE_TOO_LARGE` - 400
-* `INVALID_FILE_FIELD` - 400
-* `INVALID_DOCUMENT_TYPE` - 400
-* `DOCUMENT_SAVE_ERROR` - 500
-* `FILE_SAVE_ERROR` - 500
-
-## Mocks
-
-* `INVALID_MOCK_QUANTITY` - 400
-* `MOCK_GENERATION_ERROR` - 500
-* `MOCK_DATABASE_ERROR` - 500
+El middleware global también contempla errores inesperados y responde con un error HTTP `500` en formato JSON.
 
 ---
 
@@ -916,31 +631,7 @@ Los errores controlados utilizan el código HTTP correspondiente definido en el 
 
 El proyecto utiliza **Winston** como sistema centralizado de logging.
 
-El logger permite registrar diferentes tipos de eventos según su importancia y facilita el monitoreo y debugging de la aplicación.
-
-Además de los eventos generales de la API, el sistema registra eventos relacionados con la carga de archivos.
-
-Entre ellos:
-
-* Carga exitosa de documentos.
-* Carga exitosa de comprobantes.
-* Asociación de comprobantes con entregas.
-* Errores durante la carga.
-* Intentos de utilizar tipos de archivo no permitidos.
-* Errores durante el guardado de metadatos.
-
-## Niveles de log
-
-| Nivel     | Descripción                                                                         |
-| --------- | ----------------------------------------------------------------------------------- |
-| `fatal`   | Fallas críticas que pueden impedir el funcionamiento de la aplicación.              |
-| `error`   | Errores inesperados o fallas importantes durante una operación.                     |
-| `warning` | Situaciones anómalas o advertencias que no necesariamente interrumpen la operación. |
-| `info`    | Información general sobre el funcionamiento de la aplicación.                       |
-| `http`    | Información relacionada con solicitudes HTTP.                                       |
-| `debug`   | Información detallada útil durante el desarrollo y debugging.                       |
-
-Los niveles se encuentran ordenados por prioridad:
+Los niveles disponibles son:
 
 ```text
 fatal
@@ -951,120 +642,74 @@ http
 debug
 ```
 
+El nivel utilizado puede configurarse mediante:
+
+```env
+LOG_LEVEL=debug
+```
+
+En producción se recomienda utilizar un nivel más restrictivo, por ejemplo:
+
+```env
+LOG_LEVEL=info
+```
+
+El sistema registra, entre otros eventos:
+
+* Operaciones HTTP.
+* Errores de aplicación.
+* Errores inesperados.
+* Carga de documentos.
+* Carga de comprobantes.
+* Errores de carga.
+* Eventos de debugging.
+
 ---
 
-# Persistencia de logs
+# Persistencia y rotación de logs
 
-Los logs también se almacenan en archivos dentro de:
+Los logs se almacenan en:
 
 ```text
 logs/
 ```
 
-La configuración utiliza archivos separados según su propósito.
+La aplicación utiliza `winston-daily-rotate-file` para realizar la rotación de archivos según la fecha.
 
-## Archivo general
-
-El archivo `combined` almacena los eventos registrados por la aplicación según el nivel configurado.
-
-## Archivo de errores
-
-El archivo de errores almacena los eventos correspondientes a:
-
-```text
-error
-fatal
-```
-
-Esto permite consultar rápidamente los errores importantes de la aplicación.
-
----
-
-# Rotación de archivos
-
-Para evitar que los archivos de logs crezcan indefinidamente se utiliza:
-
-```text
-winston-daily-rotate-file
-```
-
-Los archivos se generan de forma rotativa utilizando la fecha.
-
-Esto permite mantener separados los registros correspondientes a diferentes períodos.
+La carpeta `logs/` se encuentra excluida del repositorio.
 
 ---
 
 # Endpoint de prueba del logger
 
-Para comprobar el funcionamiento de Winston se incorporó un router específico de prueba:
+El router de prueba se encuentra en:
 
 ```text
 /api/loggerTest
 ```
 
-Este módulo permite generar registros de todos los niveles disponibles.
-
-> Estos endpoints son únicamente herramientas de validación del sistema de logging y no representan funcionalidades de negocio.
-
-## DEBUG
+Endpoints:
 
 ```http
 GET /api/loggerTest/debug
-```
-
-## HTTP
-
-```http
 GET /api/loggerTest/http
-```
-
-## INFO
-
-```http
 GET /api/loggerTest/info
-```
-
-## WARNING
-
-```http
 GET /api/loggerTest/warn
-```
-
-## ERROR
-
-```http
 GET /api/loggerTest/error
-```
-
-## FATAL
-
-```http
 GET /api/loggerTest/fatal
 ```
 
-Los endpoints `/error` y `/fatal` registran eventos con esos niveles, pero no representan necesariamente un error HTTP.
-
-Por este motivo, pueden responder `200 OK` después de generar correctamente el log.
+Estos endpoints sirven para comprobar el funcionamiento del sistema de logging y no representan funcionalidades de negocio.
 
 ---
 
 # Testing
 
-El proyecto cuenta con una suite de tests funcionales automatizados que valida los endpoints principales de ShipNow, cubriendo casos exitosos y errores esperados.
+El proyecto cuenta con una suite de tests funcionales automatizados utilizando:
 
-Herramientas utilizadas:
-
-* **Mocha:** framework de pruebas para organizar y ejecutar los tests.
-* **Chai:** librería de aserciones para validar estados HTTP, estructura del body y propiedades.
-* **Supertest:** permite realizar peticiones HTTP sobre la aplicación Express sin abrir puertos manualmente.
-
-## Entorno de testing
-
-El entorno está separado del desarrollo mediante:
-
-* Un archivo `.env.test`.
-* Una base de datos independiente.
-* Una estrategia de limpieza de datos para mantener las pruebas controladas y repetibles.
+* Mocha
+* Chai
+* Supertest
 
 ## Ejecutar los tests
 
@@ -1072,160 +717,257 @@ El entorno está separado del desarrollo mediante:
 npm test
 ```
 
-## Módulos cubiertos
+La suite actual cuenta con **55 tests passing**.
 
-* **Users:** listado, obtención por ID, creación y validación de casos de error.
-* **User Documents:** carga correcta de documentos, archivo faltante, tipo de documento inválido y entidad inexistente.
-* **Orders:** creación, listado, obtención por ID, actualización de estados y validación de errores.
-* **Deliveries:** listado, obtención, creación, actualización de estados y validaciones.
-* **Delivery Receipts:** carga correcta de comprobantes, archivo faltante y entrega inexistente.
-* **Mocks:** generación de usuarios y órdenes simuladas y persistencia de datos de prueba.
-* **Logger:** verificación de los endpoints de prueba de logging.
-* **Swagger:** comprobación de la accesibilidad de la documentación interactiva.
+Los tests cubren, entre otros:
 
-Las pruebas de carga utilizan archivos fixture ubicados dentro de:
+* Users.
+* User Documents.
+* Orders.
+* Deliveries.
+* Delivery Persons.
+* Delivery Receipts.
+* Mocks.
+* Logger.
+* Swagger.
+* Validaciones y errores.
 
-```text
-test/fixtures/
-```
-
-Por ejemplo:
+Los tests de carga utilizan archivos fixture ubicados en:
 
 ```text
 test/
 └── fixtures/
-    └── test-image.jpg
 ```
 
-Los archivos utilizados como fixtures forman parte de los tests y no corresponden a archivos cargados por usuarios durante la ejecución normal de la aplicación.
+Estos archivos forman parte de los tests y son independientes de la carpeta `uploads/`.
 
 ---
 
 # Docker
 
-La aplicación está preparada para ejecutarse dentro de un contenedor Docker.
+La aplicación está preparada para ejecutarse mediante Docker.
 
-## Dockerfile
-
-El proyecto utiliza una imagen oficial de Node.js como base.
-
-El Dockerfile:
-
-* Utiliza Node.js.
-* Define `/app` como directorio de trabajo.
-* Copia `package.json` y `package-lock.json`.
-* Instala las dependencias necesarias para ejecución.
-* Copia el código fuente.
-* Expone el puerto `8080`.
-* Ejecuta la aplicación mediante `npm start`.
+El proyecto utiliza un **Dockerfile multi-stage** para separar la instalación de dependencias de la imagen final de ejecución.
 
 ## Construir la imagen
 
-Desde la raíz del proyecto:
+Desde la raíz:
 
 ```bash
 docker build -t shipnow .
 ```
 
-Esto genera una imagen denominada:
+Esto genera:
 
 ```text
 shipnow:latest
 ```
 
-## Ejecutar el contenedor
+## Ejecutar solamente la API
 
-Las variables de entorno se proporcionan externamente mediante un archivo `.env`.
+También es posible ejecutar la imagen directamente:
 
 ```bash
 docker run --env-file .env -p 8080:8080 --name shipnow-api shipnow
 ```
 
-El puerto se publica de la siguiente manera:
+En este caso, `MONGODB_URI` debe apuntar a una instancia de MongoDB accesible desde el contenedor.
+
+---
+
+# Docker Compose
+
+La forma recomendada para ejecutar el entorno completo es mediante **Docker Compose**.
+
+Compose administra:
+
+* API ShipNow.
+* MongoDB.
+* Red entre servicios.
+* Variables de entorno.
+* Persistencia de MongoDB.
+* Healthcheck de MongoDB.
+* Dependencia de la API respecto de MongoDB.
+
+La configuración se encuentra en:
 
 ```text
-8080 del host → 8080 del contenedor
+docker-compose.yml
 ```
 
-## Verificar el contenedor
+## Servicios
 
-Para comprobar que el contenedor está ejecutándose:
+```text
+docker-compose.yml
+│
+├── mongo
+│   └── MongoDB 8
+│
+└── api
+    └── ShipNow
+```
+
+## MongoDB
+
+El servicio utiliza:
+
+```text
+mongo:8
+```
+
+La base de datos utilizada por la API dentro de Compose es:
+
+```text
+mongodb://mongo:27017/shipnow
+```
+
+El nombre `mongo` corresponde al nombre del servicio dentro de la red de Docker Compose.
+
+MongoDB utiliza un volumen persistente:
+
+```text
+mongo_data
+```
+
+## Healthcheck
+
+MongoDB cuenta con un healthcheck utilizando:
+
+```text
+mongosh
+```
+
+El healthcheck comprueba que MongoDB pueda responder correctamente antes de considerar el servicio saludable.
+
+La API utiliza:
+
+```yaml
+depends_on:
+  mongo:
+    condition: service_healthy
+```
+
+Por lo tanto, la API espera a que MongoDB se encuentre saludable antes de iniciar.
+
+## Levantar el entorno
+
+Desde la raíz del proyecto:
 
 ```bash
-docker ps
+docker compose up --build
 ```
 
-La aplicación debe mostrar un mapeo similar a:
+Para ejecutarlo en segundo plano:
+
+```bash
+docker compose up -d --build
+```
+
+## Ver el estado de los servicios
+
+```bash
+docker compose ps
+```
+
+Una ejecución correcta debe mostrar ambos servicios:
+
+```text
+shipnow-api
+shipnow-mongo
+```
+
+MongoDB debe aparecer como:
+
+```text
+Up (healthy)
+```
+
+y la API debe publicar:
 
 ```text
 0.0.0.0:8080->8080/tcp
 ```
 
-## Logs del contenedor
-
-Para consultar los logs:
+## Detener los servicios
 
 ```bash
-docker logs shipnow-api
+docker compose down
 ```
 
-Al iniciar correctamente, se espera visualizar mensajes similares a:
+El volumen de MongoDB se mantiene mientras no se utilice:
+
+```bash
+docker compose down -v
+```
+
+---
+
+# Docker y Swagger
+
+Con Docker Compose ejecutándose, la API está disponible en:
 
 ```text
-[info] MongoDB conectado
-[info] Servidor escuchando en el puerto 8080
+http://localhost:8080
 ```
 
-## Health check dentro de Docker
-
-Con el contenedor ejecutándose:
-
-```text
-http://localhost:8080/api/health
-```
-
-## Swagger dentro de Docker
-
-La documentación se encuentra disponible en:
+Swagger:
 
 ```text
 http://localhost:8080/api/docs
 ```
 
-La API también puede probarse desde Swagger mediante **Try it out**.
+Health check:
+
+```text
+http://localhost:8080/api/health
+```
+
+Los endpoints pueden probarse directamente desde Swagger mediante **Try it out**.
+
+---
+
+# Docker y carga de archivos
+
+Los archivos cargados durante la ejecución se almacenan dentro del contenedor de la API, por ejemplo:
+
+```text
+/app/uploads/users/documents/
+```
+
+o:
+
+```text
+/app/uploads/deliveries/receipts/
+```
+
+La carpeta `uploads/` se excluye de la imagen base mediante `.dockerignore` porque contiene datos generados durante la ejecución.
+
+En un entorno productivo, la persistencia de estos archivos debería resolverse mediante un volumen o almacenamiento externo.
 
 ---
 
 # .dockerignore
 
-El proyecto cuenta con un `.dockerignore` para evitar incorporar archivos innecesarios o sensibles a la imagen.
+El proyecto cuenta con `.dockerignore` para evitar incorporar archivos innecesarios o sensibles a la imagen.
 
-Actualmente se excluyen elementos como:
+Entre los elementos excluidos se encuentran:
 
 ```text
 node_modules
 npm-debug.log
-
 .env
 .env.test
 .env.development
-
 .git
 .gitignore
-
 logs
 uploads
 coverage
 tmp
-
 README.md
 ```
 
-Esto permite reducir el contenido de la imagen y evita incluir credenciales, logs generados, archivos subidos, archivos temporales y otros recursos que no son necesarios para ejecutar la aplicación.
-
-Las variables de entorno son proporcionadas externamente al contenedor.
-
-> La carpeta `uploads/` se excluye deliberadamente de la imagen base. Los archivos cargados por los usuarios son datos de ejecución y no forman parte del código fuente.
+Esto permite mantener la imagen más limpia y evita incorporar credenciales, logs, archivos subidos y archivos temporales.
 
 ---
 
@@ -1234,21 +976,38 @@ Las variables de entorno son proporcionadas externamente al contenedor.
 El proyecto utiliza una arquitectura por capas:
 
 ```text
-src/
+Route
+  ↓
+Controller
+  ↓
+Service
+  ↓
+Repository
+  ↓
+Model
+  ↓
+MongoDB
+```
 
+Estructura principal:
+
+```text
+src/
 ├── config/
 │   ├── docs/
 │   │   └── swagger.config.js
-│   │
 │   └── multer.config.js
 │
 ├── controllers/
+│
 ├── docs/
+│
 ├── middlewares/
 │   ├── errorHandler.js
 │   └── uploadError.middleware.js
 │
 ├── mocks/
+│
 ├── models/
 │   ├── user.model.js
 │   ├── order.models.js
@@ -1257,8 +1016,11 @@ src/
 │   └── document.model.js
 │
 ├── repositories/
+│
 ├── routes/
+│
 ├── services/
+│
 ├── utils/
 │   └── logger/
 │
@@ -1266,81 +1028,49 @@ src/
 └── server.js
 ```
 
-## Config
+## Controllers
 
-Contiene la configuración de la aplicación y las variables de entorno.
+Reciben las solicitudes HTTP y coordinan la respuesta.
 
-También contiene la configuración de Swagger/OpenAPI y Multer:
-
-```text
-config/
-
-├── docs/
-│   └── swagger.config.js
-│
-└── multer.config.js
-```
-
-## Docs
-
-Contiene los schemas y la documentación OpenAPI de los endpoints:
-
-```text
-docs/
-
-├── schemas.yaml
-├── mocks.yaml
-├── users.yaml
-├── orders.yaml
-├── deliveryPersons.yaml
-├── deliveries.yaml
-├── logger.yaml
-└── uploads.yaml
-```
-
-## Mocks
-
-Generan datos ficticios utilizando Faker.
+Los controllers no realizan directamente consultas a MongoDB.
 
 ## Services
 
-Contienen la lógica de negocio y coordinación de operaciones.
-
-La lógica relacionada con carga y asociación de documentos se encuentra centralizada en el servicio correspondiente.
+Contienen la lógica de negocio, validaciones y coordinación de operaciones.
 
 ## Repositories
 
-Se encargan de la comunicación con MongoDB.
+Se encargan de la comunicación con MongoDB mediante Mongoose.
 
 ## Models
 
-Definen los esquemas de Mongoose y sus validaciones.
-
-El modelo `Document` representa los metadatos de los archivos almacenados.
-
-## Controllers
-
-Reciben las solicitudes HTTP y coordinan las operaciones correspondientes.
+Definen los schemas de Mongoose y sus validaciones.
 
 ## Routes
 
-Definen los endpoints disponibles en la API.
-
-Los routers utilizan la configuración centralizada de Multer sin contener directamente la configuración de almacenamiento.
+Definen los endpoints disponibles y conectan las solicitudes con los controllers y middlewares correspondientes.
 
 ## Middlewares
 
-Contienen funcionalidades transversales de la aplicación, como:
+Contienen funcionalidades transversales como:
 
-* Manejo centralizado de errores.
-* Registro de solicitudes HTTP.
-* Manejo de errores producidos durante la carga de archivos.
+* Manejo global de errores.
+* Manejo de errores de Multer.
+* Procesamiento de solicitudes HTTP.
+
+## Config
+
+Contiene la configuración de la aplicación, Swagger/OpenAPI y Multer.
+
+## Docs
+
+Contiene la documentación OpenAPI y los schemas reutilizables.
 
 ## Utils
 
-Contiene utilidades generales del proyecto, incluyendo:
+Contiene utilidades generales como:
 
-* Configuración centralizada de Winston.
+* Winston.
 * Constantes.
 * `AppError`.
 * Diccionario de errores.
@@ -1349,54 +1079,45 @@ Contiene utilidades generales del proyecto, incluyendo:
 
 # Datos generados
 
-El sistema permite generar:
+El sistema permite generar datos simulados utilizando Faker:
 
-* Usuarios con roles válidos.
-* Órdenes asociadas a usuarios.
-* Órdenes con estados y prioridades válidos.
-* Repartidores asociados a usuarios.
-* Entregas asociadas a órdenes y repartidores.
+* Usuarios.
+* Órdenes.
+* Repartidores.
+* Entregas.
 
-Los datos generados respetan los modelos y las constantes definidas en el proyecto.
+Los datos generados respetan los modelos y constantes definidos por la aplicación.
+
+Endpoints principales:
+
+```http
+GET /api/mocks/mockingusers?qty=5
+GET /api/mocks/mockingorders?qty=5
+POST /api/mocks/generatedata?qty=5
+```
 
 ---
 
 # Pruebas con Swagger
 
-Una vez iniciado el servidor, ingresar a:
+Con la aplicación ejecutándose:
 
 ```text
 http://localhost:8080/api/docs
 ```
 
-Desde Swagger UI se pueden ejecutar los endpoints disponibles utilizando el botón **Try it out**.
-
 ## Users
 
-```text
+```http
 GET /api/users
 GET /api/users/:id
 POST /api/users
 POST /api/users/:id/documents
 ```
 
-Para cargar un documento desde Swagger se utiliza `multipart/form-data`.
-
-El campo del archivo es:
-
-```text
-file
-```
-
-y el campo adicional:
-
-```text
-documentType
-```
-
 ## Orders
 
-```text
+```http
 GET /api/orders
 GET /api/orders/:id
 POST /api/orders
@@ -1405,27 +1126,21 @@ PATCH /api/orders/:id/status
 
 ## Delivery Persons
 
-Consultar los endpoints disponibles en la sección **Delivery Persons**.
+Consultar la sección `Delivery Persons` de Swagger.
 
 ## Deliveries
 
-Consultar los endpoints disponibles en la sección **Deliveries**.
+Consultar la sección `Deliveries` de Swagger.
 
 Para cargar un comprobante:
 
-```text
+```http
 POST /api/deliveries/:id/receipt
-```
-
-El campo del archivo es:
-
-```text
-file
 ```
 
 ## Mocking
 
-```text
+```http
 GET /api/mocks/mockingusers?qty=5
 GET /api/mocks/mockingorders?qty=5
 POST /api/mocks/generatedata?qty=5
@@ -1433,7 +1148,7 @@ POST /api/mocks/generatedata?qty=5
 
 ## Logger
 
-```text
+```http
 GET /api/loggerTest/debug
 GET /api/loggerTest/http
 GET /api/loggerTest/info
@@ -1442,83 +1157,150 @@ GET /api/loggerTest/error
 GET /api/loggerTest/fatal
 ```
 
-También pueden comprobarse errores de validación utilizando cantidades inválidas:
-
-```text
-GET /api/mocks/mockingusers?qty=0
-
-GET /api/mocks/mockingusers?qty=-5
-
-GET /api/mocks/mockingorders?qty=abc
-
-POST /api/mocks/generatedata?qty=hola
-```
-
 ---
 
 # Git e información sensible
 
-Los siguientes archivos y carpetas no deben subirse al repositorio:
+Los siguientes elementos no deben formar parte del repositorio:
 
-```gitignore
+```text
 node_modules/
-
 .env
 .env.test
-
 logs/
-
 uploads/
-
 coverage/
-
 tmp/
+*.zip
+*.rar
+*.7z
 ```
 
-El archivo `.env.example` puede utilizarse como referencia para conocer las variables necesarias sin exponer valores reales.
+El proyecto utiliza `.gitignore` para excluir estos archivos y directorios.
 
 Los archivos `.env` y `.env.test` pueden contener credenciales y configuraciones sensibles.
 
-La carpeta `logs/` contiene archivos generados automáticamente por Winston y no forma parte del código fuente.
+Los logs son archivos generados automáticamente por Winston.
 
-La carpeta `uploads/` contiene archivos cargados durante la ejecución de la aplicación y debe permanecer fuera del repositorio.
+Los archivos cargados por usuarios pertenecen a la carpeta `uploads/` y no forman parte del código fuente.
 
-Los archivos utilizados como fixtures para testing, ubicados en `test/fixtures/`, son independientes de la carpeta `uploads/`.
+Los archivos de `test/fixtures/` utilizados por los tests sí forman parte del proyecto cuando son necesarios para ejecutar las pruebas.
 
 ---
 
 # Estado de la aplicación
 
-La aplicación se encuentra preparada para:
+ShipNow se encuentra preparado para:
 
 * Ejecución local.
 * Testing funcional automatizado.
 * Documentación mediante Swagger/OpenAPI.
 * Generación de datos simulados.
+* Arquitectura por capas.
 * Manejo centralizado de errores.
 * Logging centralizado y rotativo.
 * Configuración por entornos.
 * Health check.
-* Consultas con paginación y límites.
-* **Carga de documentos mediante Multer.**
-* **Carga de comprobantes asociados a entregas.**
-* **Validación de archivos y tipos de documento.**
-* **Almacenamiento organizado de archivos.**
-* **Persistencia de metadatos en MongoDB.**
-* **Integración de errores de archivos con el sistema centralizado.**
-* **Logging de eventos relacionados con uploads.**
-* **Documentación de uploads mediante Swagger/OpenAPI.**
-* **Tests funcionales de carga de archivos.**
-* Ejecución dentro de un contenedor Docker.
+* Paginación y límites máximos.
+* Carga de documentos mediante Multer.
+* Carga de comprobantes de entregas.
+* Validación de archivos.
+* Almacenamiento organizado de archivos.
+* Persistencia de metadatos en MongoDB.
+* Documentación de uploads mediante Swagger/OpenAPI.
+* Tests funcionales de carga de archivos.
+* Ejecución mediante Docker.
+* Ejecución mediante Docker Compose.
+* MongoDB administrado como servicio independiente.
+* Healthcheck de MongoDB.
+* Inicio de la API condicionado a la disponibilidad de MongoDB.
 
-La imagen Docker puede construirse mediante:
+## Verificación realizada
+
+El entorno Docker Compose fue probado verificando:
+
+```text
+shipnow-api       Up
+shipnow-mongo     Up (healthy)
+```
+
+También se verificaron mediante Swagger:
+
+```text
+GET  /api/users
+POST /api/users
+POST /api/users/:id/documents
+```
+
+La carga de un documento PDF respondió correctamente con:
+
+```text
+201 Created
+```
+
+y los metadatos del archivo fueron registrados en MongoDB.
+
+La suite de testing continúa funcionando correctamente:
+
+```text
+55 passing
+```
+
+---
+
+# Comandos principales
+
+## Desarrollo
+
+```bash
+npm run dev
+```
+
+## Producción/local
+
+```bash
+npm start
+```
+
+## Tests
+
+```bash
+npm test
+```
+
+## Docker
 
 ```bash
 docker build -t shipnow .
 ```
 
-y ejecutarse mediante:
+## Docker Compose
 
 ```bash
-docker run --env-file .env -p 8080:8080 --name shipnow-api shipnow
+docker compose up --build
 ```
+
+## Docker Compose en segundo plano
+
+```bash
+docker compose up -d --build
+```
+
+## Estado de los servicios
+
+```bash
+docker compose ps
+```
+
+## Logs
+
+```bash
+docker compose logs -f
+```
+
+## Detener Compose
+
+```bash
+docker compose down
+```
+
